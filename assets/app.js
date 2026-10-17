@@ -18,14 +18,42 @@ function sswItemHTML(it, showCat, asLink){
   const inner = `<div><div class="nm">${esc(it.n)}</div>${showCat?`<div class="ct">${it.e} ${esc(it.c)}${asLink?" · via SSW Alfa":""}</div>`:""}</div>${feeHTML(it.r)}`;
   return asLink ? `<a class="item" href="#ssw">${inner}</a>` : `<div class="item">${inner}</div>`;
 }
-function matchWords(h, words){ return words.every(w => h.includes(w)); }
+/* Pencarian: token-prefiks dengan skor (judul lebih berbobot daripada tag). */
+const toks = s => norm(s).split(/[^a-z0-9]+/).filter(Boolean);
+const ALLIDX = ALL.map(it => ({it, tt: toks(it.n), at: toks(it.h)}));
+function wScore(w, arr){
+  let best = 0;
+  for(let i = 0; i < arr.length && best < 4; i++){
+    const t = arr[i];
+    if(t === w) best = 4;                                      // kata sama persis
+    else if(t.startsWith(w) && w.length >= 3) best = Math.max(best, 3);  // prefiks
+    else if(t.includes(w) && w.length >= 4) best = Math.max(best, 1);    // substring
+  }
+  return best;
+}
+function entryScore(words, e){
+  let sum = 0;
+  for(const w of words){
+    const t = wScore(w, e.tt), a = wScore(w, e.at);
+    const s = t ? t + 3 : a;                                   // boost cocok di judul
+    if(!s) return 0;                                           // tetap mode AND
+    sum += s;
+  }
+  return sum;
+}
+function ranked(words, idx){
+  return idx.map(e => ({e, sc: entryScore(words, e)}))
+    .filter(x => x.sc > 0)
+    .sort((a,b) => b.sc - a.sc)
+    .map(x => x.e);
+}
 
 /* ============ Warna kategori: [utama, lembut, gelap] ============ */
 const COL = {adminduk:["#2563EB","#E8F0FF","#1E40AF"],surat:["#7C3AED","#F1EAFE","#5B21B6"],izin:["#059669","#E2F6EC","#047857"],sosial:["#EA580C","#FFEDE2","#C2410C"],rumah:["#CA8A04","#FEF6D6","#A16207"],didik:["#4F46E5","#ECEBFF","#3730A3"],sehat:["#E11D48","#FFE7EE","#BE123C"],kerja:["#0D9488","#DCF5F2","#0F766E"],petugas:["#475569","#EDF1F6","#334155"]};
 const cvars = g => { const [c,cs,cd] = COL[g]||COL.izin; return `--c:${c};--cs:${cs};--cd:${cd}`; };
 
 /* ============ Beranda ============ */
-const SVCIDX = SVC.map(s => ({s, h:norm([s.t,s.d,s.tags||"",GROUPS.find(g=>g[0]===s.g)[1]].join(" "))}));
+const SVCIDX = SVC.map(s => ({s, tt: toks(s.t), at: toks([s.t, s.d, s.tags || "", GROUPS.find(g => g[0] === s.g)[1]].join(" "))}));
 function tileHTML(s){
   return `<a class="tile${s.feat?" feat":""}" style="${cvars(s.g)}" href="#${s.id}"><span class="e">${s.e}</span><div><b>${esc(s.t)}</b><small>${esc(s.d)}</small><span class="ch">${esc(s.ch)}</span></div></a>`;
 }
@@ -34,9 +62,9 @@ function renderHome(){
   $("hclr").hidden = !term;
   const out = $("hout");
   if(term){
-    const words = term.split(/\s+/);
-    const hs = SVCIDX.filter(x => matchWords(x.h, words)).map(x=>x.s);
-    const ss = ALL.filter(it => matchWords(it.h, words));
+    const words = term.split(/\s+/).filter(Boolean);
+    const hs = ranked(words, SVCIDX).map(x => x.s);
+    const ss = ranked(words, ALLIDX).map(x => x.it);
     let html = "";
     if(hs.length) html += `<div class="res-h"><h3>${hs.length} panduan layanan</h3></div><div class="grid">${hs.map(tileHTML).join("")}</div>`;
     if(ss.length) html += `<div class="res-h"><h3>${ss.length} izin di SSW Alfa</h3></div><div class="results">${ss.slice(0,30).map(it=>sswItemHTML(it,true,true)).join("")}</div>`;
@@ -67,8 +95,8 @@ function renderSSW(){
   const term = norm(q.value.trim());
   clr.hidden = !term;
   if(term){
-    const words = term.split(/\s+/);
-    const hits = ALL.filter(it => matchWords(it.h, words));
+    const words = term.split(/\s+/).filter(Boolean);
+    const hits = ranked(words, ALLIDX).map(x => x.it);
     const ossHint = /\b(oss|nib|rba|izin usaha|umk|umkm|usaha mikro|nomor induk berusaha)\b/.test(term);
     out.innerHTML = (ossHint ? `<div class="callout" style="margin-bottom:10px">🏪 <span>Izin usaha seperti NIB diurus lewat <b>OSS RBA</b>, bukan SSW Alfa. <a href="#oss">Lihat caranya →</a></span></div>` : "") +
       `<div class="res-h" style="margin-top:0"><h3>${hits.length} layanan cocok</h3></div>` +
@@ -171,6 +199,12 @@ function renderSvc(s){
 }
 
 /* ============ Router ============ */
+const BRW = "Pelayanan Balai RW Wonokromo";
+const DEFAULT_DESC = (document.querySelector('meta[name="description"]')||{}).content || "";
+const VIEW_DESC = {
+  ssw: "Panduan SSW Alfa Surabaya: buat akun, ajukan izin online, pantau status, revisi berkas, dan telusuri 17 kategori layanan.",
+  oss: "Cara buat akun OSS dan NIB usaha mikro gratis di oss.go.id, bisa didampingi petugas di Balai RW Kecamatan Wonokromo."
+};
 function route(){
   const id = (location.hash||"").slice(1) || "beranda";
   let view = "beranda";
@@ -179,6 +213,14 @@ function route(){
   document.querySelectorAll("[data-view]").forEach(v => v.hidden = v.dataset.view !== view);
   $("backLink").hidden = view === "beranda";
   window.scrollTo(0,0);
+  /* Judul & deskripsi per halaman (riwayat back-button + SEO) */
+  const svc = SVCMAP[id];
+  document.title = svc ? (svc.t + " – " + BRW)
+    : view === "ssw" ? ("Panduan SSW Alfa – " + BRW)
+    : view === "oss" ? ("OSS RBA: Akun & NIB Usaha Mikro – " + BRW)
+    : BRW;
+  const md = document.querySelector('meta[name="description"]');
+  if(md) md.setAttribute("content", svc ? svc.d : (VIEW_DESC[view] || DEFAULT_DESC));
 }
 document.querySelectorAll("[data-jump]").forEach(b => b.onclick = () => $(b.dataset.jump).scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}));
 window.addEventListener("hashchange", route);

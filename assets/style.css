@@ -271,3 +271,62 @@ footer{margin-top:28px;padding-block:24px 40px;color:var(--muted);font-size:13px
   .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ============================================================
+   Overhaul polish — mobile-first pass (Oktober 2026)
+   ============================================================ */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+*{-webkit-tap-highlight-color:transparent}
+a,button,summary,label.check,input[type="checkbox"]{touch-action:manipulation}
+
+/* Rail horizontal: sembunyikan scrollbar di engine WebKit (Firefox via scrollbar-width) */
+nav.tabs .wrap::-webkit-scrollbar,.catnav::-webkit-scrollbar{display:none}
+nav.tabs .wrap,.catnav{overscroll-behavior-x:contain}
+
+/* Cari: matikan tombol clear bawaan WebKit (sudah ada .clr custom) */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration{-webkit-appearance:none;height:0;width:0}
+
+/* Target sentuh lebih besar (≥40px) */
+.quick button,.catnav button,nav.tabs button,.copy{min-height:40px}
+.clr{min-width:44px;min-height:44px;right:4px}
+.check input{width:24px;height:24px}
+.check{padding-block:12px}
+details.x summary,details.more summary{padding-block:10px;cursor:pointer}
+
+/* Umpan balik sentuh (press) */
+.btn:active,.quick button:active,.catnav button:active,nav.tabs button:active,
+.copy:active,.back:active,.clr:active{transform:scale(.95)}
+.tile:active{transform:scale(.985);box-shadow:var(--shadow)}
+.cat:active,.item:active,.stage:active{filter:brightness(.98)}
+.check input:active{background:var(--emerald-soft)}
+
+/* Netralkan hover "nyangkut" di perangkat sentuh */
+@media (hover:none){
+  .btn:hover{transform:none}
+  .tile:hover{transform:none;box-shadow:var(--shadow);border-color:var(--c)}
+  .quick button:hover,.catnav button:hover{transform:none;border-color:var(--line)}
+  .cat:hover{transform:none}
+}
+
+/* Layar kecil: tipografi & spacing */
+.appbar{background:rgba(255,255,255,.92)}
+@media (max-width:430px){
+  .kv{grid-template-columns:1fr}
+  .kv b{text-align:left}
+  .block{padding:15px}
+  .stage{padding:14px 14px 6px}
+  .stats b{font-size:20px}
+  .hero h1{font-size:clamp(27px,8.4vw,38px)}
+  .sec-h h2{font-size:21px}
+}
+@media (max-width:360px){
+  .wrap{padding-inline:14px}
+  .hero{padding-block:20px 26px}
+  .stage-h h3{font-size:18px}
+  .block h3{font-size:17px}
+}
+
+/* Toast: tidak menutupi tombol, di atas safe area + appbar */
+.toast{z-index:99;bottom:calc(env(safe-area-inset-bottom,0px) + 28px);max-width:calc(100vw - 40px);text-align:center}
+
