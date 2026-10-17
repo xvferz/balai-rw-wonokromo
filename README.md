@@ -46,23 +46,26 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
   rapi di safe-area, hover "nyangkut" dinetralkan di perangkat sentuh.
 - **Pencarian lebih pintar**: token + prefiks + skor (judul lebih berbobot daripada tag),
   masih mode-AND sehingga hasil tetap relevan.
-- **Tampilan v4 "Ramping & Rapi"**:
-  - Banner dipersempit: hanya eyebrow + judul + ringkasan + pencarian (angka statistik dan
-    chip "Cari cepat" pindah ke **strip putih di bawah banner**), sehingga tidak padat di HP.
-  - Chip "Cari cepat" hanya menampilkan 8 pertama + tombol "+8 lagi" (bisa dibuka/tutup).
+- **Tampilan v5 "Ramping & Rapi"**:
+  - Banner dipersempit: hanya eyebrow + judul + ringkasan + pencarian; angka statistik pindah ke
+    **strip putih di bawah banner**, jadi tidak padat di HP.
+  - Latar banner diberi tekstur halus: titik + lingkaran konsentris + ikon garis besar samar
+    (disembunyikan di layar HP).
   - Kartu bergaya **putih + garis tipis + radius 20px tanpa bayangan**; saat hover (desktop)
     kartu terangkat dan judulnya memakai warna kategorinya.
   - Grid kategori jadi vertikal di layar HP supaya teks tidak sempit.
   - Saat mengetik pencarian, grid kategori disembunyikan agar fokus ke hasil.
+  - Penandaan "kartu unggulan" (warna oranye) dihapus — semua kartu sama.
+  - Kolom pencarian di header dan chip "Cari cepat" dihapus; pencarian hanya di banner.
 - **Desain v3 "Ikon & Navigasi"**:
   - **Ikon SVG line-art** sebagai satu sprite inline (`<symbol>` + `<use>`), 39 ikon —
     dipakai di header, kartu kategori, judul seksi, baris kontak, footer, dan langkah.
   - **Header modern**: sticky dengan logo mark, nav (Beranda/SSW Alfa/OSS RBA/Layanan/Bantuan),
-    kolom pencarian yang sinkron dengan pencarian hero, tombol tema, dan **drawer** di mobile.
+    tombol tema, dan **drawer** di mobile.
   - **Mode gelap/terang** lengkap (token terpisah), mengikuti sistem, diingat di `localStorage`,
     plus pratinjau paksa lewat `?t=light` / `?t=dark`.
-  - **Beranda lebih padat**: hero bigger + chip "Cari cepat", **grid 9 kategori berikon**
-    (menggantikan rel kategori lama), kartu info Balai RW, dan **FAQ** (6 pertanyaan).
+  - **Beranda lebih padat**: grid 9 kategori berikon (menggantikan rel kategori lama),
+    kartu info Balai RW, dan **FAQ** (6 pertanyaan).
   - **Footer modern**: 4 kolom (brand + kontak, navigasi, kategori, layanan resmi),
     bar bawah dengan tombol "Kembali ke atas".
   - Warna kategori kini diturunkan dari satu hue per grup (`--ch`/`--csat`) sehingga

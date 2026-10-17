@@ -82,7 +82,7 @@ function ranked(words, idx){
 /* ============ Beranda ============ */
 const SVCIDX = SVC.map(s => ({s, tt: toks(s.t), at: toks([s.t, s.d, s.tags || "", gname(s.g)].join(" "))}));
 function tileHTML(s){
-  return `<a class="tile${s.feat?" feat":""}" data-cat style="${cvars(s.g)}" href="#${s.id}"><b>${esc(s.t)}</b><small>${esc(s.d)}</small><span class="ch">${esc(s.ch)}</span>${IC("arrow-up-right","go")}</a>`;
+  return `<a class="tile" data-cat style="${cvars(s.g)}" href="#${s.id}"><b>${esc(s.t)}</b><small>${esc(s.d)}</small><span class="ch">${esc(s.ch)}</span>${IC("arrow-up-right","go")}</a>`;
 }
 function rwcardHTML(){
   return `<div class="rwcard"><span class="rw-ic">${IC("building")}</span>
@@ -130,30 +130,13 @@ $("kgrid").innerHTML = GROUPS.map(([g,l]) => {
 }).join("");
 $("footCats").innerHTML = GROUPS.map(([g,l]) => `<li><button type="button" data-g="${g}">${esc(tidy(l))}</button></li>`).join("");
 
-/* Chip cari cepat (disingkat jadi 8 + tombol buka, supaya banner/strip tidak padat) */
-const HQUICK = [["Cek desil/gamis","cek gamis"],["SKTM","sktm"],["Akun KNG","kng"],["KTP digital","ikd"],["Nikah","nikah"],["Sanggah desil","desil"],["KTP hilang","ktp"],["Akta","akta"],["Ahli waris","waris"],["Beasiswa","beasiswa"],["BPJS gratis","bpjs"],["Bedah rumah","rutilahu"],["PKH / BPNT","pkh"],["NIB","nib"],["IMB / PBG","imb"],["Cari kerja","kerja"]];
-const VISIBLE_Q = 8;
-$("hquick").innerHTML = HQUICK.map(([l,t])=>`<button type="button" data-t="${t}">${esc(tidy(l))}</button>`).join("")
-  + `<button class="qmore" type="button" aria-expanded="false">+${HQUICK.length - VISIBLE_Q} lagi</button>`;
-$("hquick").classList.add("collapsed");
-{
-  const box = $("hquick"), more = box.querySelector(".qmore");
-  more.onclick = () => {
-    const collapsed = box.classList.toggle("collapsed");
-    more.setAttribute("aria-expanded", String(!collapsed));
-    more.textContent = collapsed ? "+" + (HQUICK.length - VISIBLE_Q) + " lagi" : "Lebih sedikit";
-  };
-}
 $("hstats").innerHTML = `<div><b>${SVC.length}</b><span>panduan layanan</span></div><div><b>${ALL.length}</b><span>izin di SSW Alfa</span></div><div><b>${GROUPS.length}</b><span>kategori</span></div>`;
 
-/* ============ Pencarian global (hero + header) ============ */
-function setTerm(v){ $("hq").value = v; $("gq").value = v; renderHome(); }
-$("hq").addEventListener("input", e => { $("gq").value = e.target.value; renderHome(); });
-$("gq").addEventListener("input", e => { $("hq").value = e.target.value; renderHome(); });
+/* ============ Pencarian global (di banner) ============ */
+function setTerm(v){ $("hq").value = v; renderHome(); }
+$("hq").addEventListener("input", () => renderHome());
 $("hclr").onclick = () => { setTerm(""); $("hq").focus(); };
-$("hquick").querySelectorAll("button").forEach(b => { if(b.classList.contains("qmore")) return; b.onclick = () => { setTerm(b.dataset.t); scrollToEl($("hout")); }; });
 $("hsearchHero").addEventListener("submit", e => e.preventDefault());
-$("hsearch").addEventListener("submit", e => { e.preventDefault(); $("gq").blur(); });
 
 /* ============ SSW finder ============ */
 const out = $("out"), q = $("q"), clr = $("clr");
@@ -237,6 +220,9 @@ function renderSvc(s){
   const hero = $("svcHead").parentElement;
   hero.setAttribute("data-cat", "");
   hero.setAttribute("style", cvars(s.g));
+  const oldArt = hero.querySelector(".hero-art");
+  if(oldArt) oldArt.remove();
+  hero.insertAdjacentHTML("afterbegin", `<svg class="hero-art" aria-hidden="true"><use href="#i-${gicon(s.g)}"/></svg>`);
   $("svcBody").setAttribute("data-cat", "");
   $("svcBody").setAttribute("style", cvars(s.g));
   const crumb = (h) => `<nav class="crumbs"><a href="#beranda">Beranda</a>${IC("chevron-right")}<button type="button" data-g="${s.g}">${esc(gname(s.g))}</button>${IC("chevron-right")}<span>${esc(s.t)}</span></nav>`;
@@ -263,22 +249,13 @@ function renderSvc(s){
   wireBoxes(body); bindCopy(body);
 }
 
-/* ============ Shell: header, tema, drawer, navigasi ============ */
-const head = $("head"), drawer = $("drawer"), menuBtn = $("menuBtn"), sbtn = $("sbtn");
+/* ============ Shell: tema, drawer, navigasi ============ */
+const drawer = $("drawer"), menuBtn = $("menuBtn");
 function closeDrawer(){ if(drawer.hidden) return; drawer.hidden = true; menuBtn.setAttribute("aria-expanded","false"); document.body.style.overflow = ""; }
 function openDrawer(){ drawer.hidden = false; menuBtn.setAttribute("aria-expanded","true"); document.body.style.overflow = "hidden"; }
 menuBtn.onclick = () => drawer.hidden ? openDrawer() : closeDrawer();
 drawer.addEventListener("click", e => { if(e.target === drawer) closeDrawer(); });
-sbtn.onclick = () => {
-  const open = head.classList.toggle("search-open");
-  sbtn.setAttribute("aria-expanded", open);
-  if(open) $("gq").focus(); else $("gq").blur();
-};
-document.addEventListener("keydown", e => {
-  if(e.key !== "Escape") return;
-  closeDrawer();
-  if(head.classList.contains("search-open")){ head.classList.remove("search-open"); sbtn.setAttribute("aria-expanded","false"); }
-});
+document.addEventListener("keydown", e => { if(e.key === "Escape") closeDrawer(); });
 /* Tema */
 const THEME_KEY = "brw-theme";
 function applyTheme(t){

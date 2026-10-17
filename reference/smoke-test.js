@@ -39,7 +39,7 @@ srv.listen(8932, '127.0.0.1', async () => {
     const sw = (await get('sw.js')).body;
     L.push('sw.js: has fetch handler=' + sw.includes("'fetch'") + ', version=' + (sw.match(/VERSION = '([^']+)'/) || [])[1]);
     // every DOM id app.js touches (v3 shell)
-    for (const id of ['hq','gq','hout','kgrid','hstats','hquick','hclr','out','q','clr','quick','barFill','barText','resetBtn','ossFill','ossText','ossReset','svcHead','svcBody','toast','sswShare','ossShare','sswStages','head','drawer','menuBtn','sbtn','themeBtn','totop','footCats','bantuan'])
+    for (const id of ['hq','hout','kgrid','hstats','hclr','out','q','clr','quick','barFill','barText','resetBtn','ossFill','ossText','ossReset','svcHead','svcBody','toast','sswShare','ossShare','sswStages','drawer','menuBtn','themeBtn','totop','footCats','bantuan'])
       if (!html.includes('id="' + id + '"')) L.push('MISSING id=' + id);
     // v3 features present
     for (const n of ['<symbol id="i-search"', 'id="kgrid"', 'faq-item', 'foot-top', 'dataset.theme', 'brw-theme'])
