@@ -1,0 +1,48 @@
+# Pelayanan Balai RW Wonokromo — Remake
+
+Pembuatan ulang dari https://pelayanan-balai-rw.netlify.app/
+Portal perorangan berisi panduan layanan warga Kecamatan Wonokromo, Kota Surabaya:
+KTP/KK/Akta, surat keterangan, perizinan (SSW Alfa), izin usaha mikro (OSS RBA/NIB),
+bansos, pendidikan, kesehatan, dan pekerjaan.
+
+✍️ Kredit konten asli: **Muhammad Ghifari Iksan, S.Tr.IP., M.A.P.**
+Referensi snapshot dari situs asli disimpan di `reference/`.
+
+## Struktur
+
+```
+index.html            → seluruh markup (4 view: beranda, ssw, oss, svc)
+assets/style.css      → seluruh CSS (tema terang, emas-zamrud)
+assets/data.js        → data murni: CATS (17 kategori, ~130 layanan SSW),
+                        GROUPS (9 kelompok portal), SVC (~40 panduan layanan)
+assets/app.js         → logika: pencarian, checklist localStorage, router hash,
+                        halaman layanan dinamis, tombol salin & bagikan
+reference/            → snapshot HTML asli + catatan + hasil ekstraksi
+```
+
+## Menjalankan secara lokal
+
+```bash
+# dari folder ini (harus lewat http, bukan file://, karena hash router + fetch font)
+npx serve .          # atau python -m http.server 8000
+```
+
+## Perbedaan vs situs asli
+
+- Dipecah menjadi `index.html` + `assets/{style.css,data.js,app.js}` (asli: satu file HTML raksasa).
+- Menghapus snippet kolom komentar/HUD khusus Netlify.
+- Semua konten, data layanan, dan fitur interaktif sama seperti aslinya.
+
+## Melakukan edit
+
+- Menambah/mengubah panduan layanan: edit array `SVC` di `assets/data.js`
+  (setiap item: `id, g(grup), e(emoji), t(judul), d, ch, tags, bring, cases, steps, kv, notes, contacts, links, src`).
+- Menambah layanan SSW Alfa: edit `CATS` (format `[nama, retribusi(0/1), kata kunci]`).
+- Mengubah tampilan: `assets/style.css`.
+
+## Menyebarkan
+
+Statis tanpa langkah build — tarik-dan-letakkan folder tersebut ke Netlify, atau:
+```bash
+npx netlify-cli deploy --dir . --prod
+```
