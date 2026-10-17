@@ -271,6 +271,17 @@ applyTheme(document.documentElement.dataset.theme || "light");
 $("totop").onclick = () => window.scrollTo({ top: 0, behavior: smooth() });
 /* delegated: kategori, section, hapus pencarian, tab */
 document.addEventListener("click", e => {
+  const home = e.target.closest('[data-nav="beranda"]');
+  if(home){
+    closeDrawer();
+    /* Sudah di beranda? hash tidak berubah, jadi scroll ke atas manual */
+    if(((location.hash || "").slice(1) || "beranda") === "beranda"){
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: smooth() });
+      markNav("beranda");
+    }
+    return;
+  }
   const grp = e.target.closest("[data-g]");
   if(grp){ closeDrawer(); goGroup(grp.dataset.g); return; }
   const go = e.target.closest("[data-go]");
