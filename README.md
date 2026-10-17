@@ -12,11 +12,11 @@ Referensi snapshot dari situs asli disimpan di `reference/`.
 
 ```
 index.html            → seluruh markup (4 view: beranda, ssw, oss, svc) + sprite ikon SVG
-assets/style.css      → design system v3 (token, light + dark, komponen, responsif)
+assets/style.css      → design system v3+ (token, light + dark, komponen, responsif)
 assets/data.js        → data murni: CATS (17 kategori, ~130 layanan SSW),
                         GROUPS (9 kelompok portal), SVC (~40 panduan layanan)
 assets/app.js         → logika: render + ikon, pencarian berbobot skor, checklist localStorage,
-                        router hash + judul/deskripsi per halaman, tema, drawer, salin & bagikan
+                        router hash + judul/deskripsi per halaman, tema per kategori, drawer, bagikan
 sw.js                 → service worker (offline-first, stale-while-revalidate)
 manifest.webmanifest  → PWA manifest (dapat di-install ke layar utama HP)
 assets/icons/         → ikon PWA (dibuat oleh tools/make-icons.js)
@@ -25,6 +25,11 @@ reference/            → snapshot HTML asli + catatan + hasil ekstraksi + skrip
 netlify.toml          → config deploy Netlify (publish ".", cache headers)
 robots.txt
 ```
+
+## Tipografi
+
+Seluruh teks memakai **Poppins** (400/500/600/700/800) dari Google Fonts —
+satu keluarga untuk judul dan isi, agar konsisten dan mudah dibaca di HP.
 
 ## Menjalankan secara lokal
 
