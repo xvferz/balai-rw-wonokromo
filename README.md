@@ -11,17 +11,17 @@ Referensi snapshot dari situs asli disimpan di `reference/`.
 ## Struktur
 
 ```
-index.html            → seluruh markup (4 view: beranda, ssw, oss, svc)
-assets/style.css      → seluruh CSS (tema terang + blok "overhaul polish" mobile di bawah)
+index.html            → seluruh markup (4 view: beranda, ssw, oss, svc) + sprite ikon SVG
+assets/style.css      → design system v3 (token, light + dark, komponen, responsif)
 assets/data.js        → data murni: CATS (17 kategori, ~130 layanan SSW),
                         GROUPS (9 kelompok portal), SVC (~40 panduan layanan)
-assets/app.js         → logika: pencarian berbobot skor, checklist localStorage,
-                        router hash + judul/deskripsi per halaman, tombol salin & bagikan
+assets/app.js         → logika: render + ikon, pencarian berbobot skor, checklist localStorage,
+                        router hash + judul/deskripsi per halaman, tema, drawer, salin & bagikan
 sw.js                 → service worker (offline-first, stale-while-revalidate)
 manifest.webmanifest  → PWA manifest (dapat di-install ke layar utama HP)
 assets/icons/         → ikon PWA (dibuat oleh tools/make-icons.js)
 serve.js              → server statis kecil untuk uji lokal / preview via Wi-Fi
-reference/            → snapshot HTML asli + catatan + hasil ekstraksi
+reference/            → snapshot HTML asli + catatan + hasil ekstraksi + skrip uji
 netlify.toml          → config deploy Netlify (publish ".", cache headers)
 robots.txt
 ```
@@ -46,10 +46,19 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
   rapi di safe-area, hover "nyangkut" dinetralkan di perangkat sentuh.
 - **Pencarian lebih pintar**: token + prefiks + skor (judul lebih berbobot daripada tag),
   masih mode-AND sehingga hasil tetap relevan.
-- **Desain v2 "Clean & Consistent"**: design token (skala spasi/radius/bayangan/tipografi),
-  tanpa emoji & ikon (teks murni + panah tipografis), 9 warna kategori disatukan pada satu
-  ramp HSL (hue saja), satu komponen tombol/chip/kartu/pencarian, scrollspy instan pada tab
-  SSW & kategori beranda, strip kredit dipindah ke footer.
+- **Desain v3 "Ikon & Navigasi"** (Oct 2026):
+  - **Ikon SVG line-art** sebagai satu sprite inline (`<symbol>` + `<use>`), 39 ikon —
+    dipakai di header, kartu kategori, judul seksi, baris kontak, footer, dan langkah.
+  - **Header modern**: sticky dengan logo mark, nav (Beranda/SSW Alfa/OSS RBA/Layanan/Bantuan),
+    kolom pencarian yang sinkron dengan pencarian hero, tombol tema, dan **drawer** di mobile.
+  - **Mode gelap/terang** lengkap (token terpisah), mengikuti sistem, diingat di `localStorage`,
+    plus pratinjau paksa lewat `?t=light` / `?t=dark`.
+  - **Beranda lebih padat**: hero bigger + chip "Cari cepat", **grid 9 kategori berikon**
+    (menggantikan rel kategori lama), kartu info Balai RW, dan **FAQ** (6 pertanyaan).
+  - **Footer modern**: 4 kolom (brand + kontak, navigasi, kategori, layanan resmi),
+    bar bawah dengan kredit & tombol "Kembali ke atas".
+  - Warna kategori kini diturunkan dari satu hue per grup (`--ch`/`--csat`) sehingga
+    tint gelap/terang tetap konsisten di kedua tema.
 - **SEO/halaman**: tiap route mengubah `document.title` + meta description
   (riwayat back-button lebih informatif); canonical + og:image + robots.txt.
 - Semua konten, data layanan, dan fitur interaktif sama seperti aslinya.

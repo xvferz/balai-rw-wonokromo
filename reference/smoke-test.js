@@ -38,9 +38,12 @@ srv.listen(8932, '127.0.0.1', async () => {
     // sw sanity
     const sw = (await get('sw.js')).body;
     L.push('sw.js: has fetch handler=' + sw.includes("'fetch'") + ', version=' + (sw.match(/VERSION = '([^']+)'/) || [])[1]);
-    // every DOM id app.js touches
-    for (const id of ['hq','hout','catnav','hstats','hquick','hclr','out','q','clr','quick','barFill','barText','resetBtn','ossFill','ossText','ossReset','svcHead','svcBody','toast','backLink','sswShare','ossShare','sswStages'])
+    // every DOM id app.js touches (v3 shell)
+    for (const id of ['hq','gq','hout','kgrid','hstats','hquick','hclr','out','q','clr','quick','barFill','barText','resetBtn','ossFill','ossText','ossReset','svcHead','svcBody','toast','sswShare','ossShare','sswStages','head','drawer','menuBtn','sbtn','themeBtn','totop','footCats','bantuan'])
       if (!html.includes('id="' + id + '"')) L.push('MISSING id=' + id);
+    // v3 features present
+    for (const n of ['<symbol id="i-search"', 'id="kgrid"', 'faq-item', 'foot-top', 'dataset.theme', 'brw-theme'])
+      if (!html.includes(n)) L.push('MISSING feature: ' + n);
     // Desain: kontras emoji bebas. app.js boleh punya emoji HANYA di data label
     // HQUICK/QUICK yang selalu melewati tidy() saat render.
     const EMOJI_RE = /[0-9]\u{FE0F}?\u{20E3}|[\u{1F000}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}\u{2300}-\u{23FF}\u{25A0}-\u{25FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]\u{FE0F}?|[\u{200D}\u{20E3}\u{FE0F}]/u;
@@ -54,7 +57,7 @@ srv.listen(8932, '127.0.0.1', async () => {
       L.push('assets/app.js: emoji only in tidied label data = ' + (ok ? 'OK' : 'FAIL line ' + hits.map(h => h.n).join(',')));
     }
     const cssT = fs.readFileSync(path.join(ROOT, 'assets/style.css'), 'utf8');
-    L.push('css tokens: ' + (cssT.includes('--r-md:16px') && cssT.includes('--shadow-2') && cssT.includes('border-inline-start') && cssT.includes('nav.tabs button.on') ? 'OK' : 'MISSING'));
+    L.push('css tokens: ' + (cssT.includes('--r-md:16px') && cssT.includes('--sh-2') && cssT.includes('[data-theme="dark"]') && cssT.includes('.hero[data-cat]') && cssT.includes('.tabs button.on') ? 'OK' : 'MISSING'));
     L.push('DONE');
   } catch (e) { L.push('ERROR ' + e); }
   srv.close();

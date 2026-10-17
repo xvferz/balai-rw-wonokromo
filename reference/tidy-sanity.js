@@ -2,7 +2,7 @@
 const fs = require('fs');
 const src = fs.readFileSync(__dirname + '/../assets/app.js', 'utf8');
 const start = src.indexOf('const EMOJI_RE');
-const end = src.indexOf('/* ============ SSW finder data');
+const end = src.indexOf('/* ============ Warna & ikon kategori');
 const block = src.slice(start, end);
 
 const code = `

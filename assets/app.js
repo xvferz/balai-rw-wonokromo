@@ -1,11 +1,19 @@
-/* ============ Utilitas ============ */
+/* ============================================================
+   Pelayanan Balai RW Wonokromo — app v3
+   Ikon SVG, grid kategori, header + drawer, mode gelap.
+   ============================================================ */
 const $ = id => document.getElementById(id);
+const $$ = sel => [...document.querySelectorAll(sel)];
 const esc = s => String(s).replace(/[&<>"]/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
-/* Desain bersih: buang semua emoji/ikon agar tampilan konsisten lintas perangkat.
-   Panah tipografis (→, ↗) dan tanda baca sengaja dipertahankan. */
+/* Emoji dibuang saat render agar tampilan konsisten lintas perangkat.
+   Panah tipografis (→, ↗, ×) dan tanda baca tetap dipertahankan. */
 const EMOJI_RE = /[0-9]\u{FE0F}?\u{20E3}|[\u{1F000}-\u{1FAFF}\u{1F1E6}-\u{1F1FF}\u{2300}-\u{23FF}\u{25A0}-\u{25FF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}]\u{FE0F}?|[\u{200D}\u{20E3}\u{FE0F}]/gu;
 const tidy = s => String(s).replace(EMOJI_RE, "").replace(/\s{2,}/g, " ").trim();
 const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+/* Ikon dari sprite inline */
+const IC = (n, cls) => `<svg class="ic${cls ? " " + cls : ""}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const smooth = () => matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth";
+const scrollToEl = el => { if (el) el.scrollIntoView({ behavior: smooth(), block: "start" }); };
 function toast(msg){ const t=$("toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),1800); }
 function bindCopy(root){
   root.querySelectorAll(".copy").forEach(b => b.onclick = () => {
@@ -15,23 +23,42 @@ function bindCopy(root){
   });
 }
 
-/* ============ SSW finder data ============ */
+/* ============ Warna & ikon kategori (hue per grup) ============ */
+const HUE = {
+  adminduk:[216,58], surat:[268,44], izin:[160,52], sosial:[22,62], rumah:[42,66],
+  didik:[244,52], sehat:[348,52], kerja:[176,48], petugas:[212,26]
+};
+const GICON = { adminduk:"idcard", surat:"file", izin:"building", sosial:"gift", rumah:"home", didik:"grad", sehat:"heart", kerja:"briefcase", petugas:"user-check" };
+const cvars = g => { const [h,s] = HUE[g] || HUE.izin; return `--ch:${h};--csat:${s}%`; };
+const gicon = g => GICON[g] || "list";
+const gname = g => { const row = GROUPS.find(x => x[0] === g); return tidy(row ? row[1] : ""); };
+const iconFor = l => {
+  const s = String(l).toLowerCase();
+  if (/whatsapp|takon/.test(s)) return "chat";
+  if (/telp|hp|ponsel/.test(s)) return "phone";
+  if (/mail|email/.test(s)) return "mail";
+  if (/alamat|datang|lokasi|kantor|siola/.test(s)) return "pin";
+  if (/situs|web|instagram|tiktok|oss\.go/.test(s)) return "globe";
+  if (/jam|waktu/.test(s)) return "clock";
+  return "info";
+};
+
+/* ============ Pencarian SSW (skor token + prefiks) ============ */
 const ALL = CATS.flatMap(c => c.s.map(([n,r,k]) => ({n,r,c:c.n,e:c.e,h:norm(n+" "+c.n+" "+(k||""))})));
 function feeHTML(r){ return `<span class="fee ${r?"r":"n"}">${r?"Ada retribusi":"Tanpa retribusi"}</span>`; }
 function sswItemHTML(it, showCat, asLink){
   const inner = `<div><div class="nm">${esc(it.n)}</div>${showCat?`<div class="ct">${esc(it.c)}${asLink?" · via SSW Alfa":""}</div>`:""}</div>${feeHTML(it.r)}`;
   return asLink ? `<a class="item" href="#ssw">${inner}</a>` : `<div class="item">${inner}</div>`;
 }
-/* Pencarian: token-prefiks dengan skor (judul lebih berbobot daripada tag). */
 const toks = s => norm(s).split(/[^a-z0-9]+/).filter(Boolean);
 const ALLIDX = ALL.map(it => ({it, tt: toks(it.n), at: toks(it.h)}));
 function wScore(w, arr){
   let best = 0;
   for(let i = 0; i < arr.length && best < 4; i++){
     const t = arr[i];
-    if(t === w) best = 4;                                      // kata sama persis
-    else if(t.startsWith(w) && w.length >= 3) best = Math.max(best, 3);  // prefiks
-    else if(t.includes(w) && w.length >= 4) best = Math.max(best, 1);    // substring
+    if(t === w) best = 4;
+    else if(t.startsWith(w) && w.length >= 3) best = Math.max(best, 3);
+    else if(t.includes(w) && w.length >= 4) best = Math.max(best, 1);
   }
   return best;
 }
@@ -39,8 +66,8 @@ function entryScore(words, e){
   let sum = 0;
   for(const w of words){
     const t = wScore(w, e.tt), a = wScore(w, e.at);
-    const s = t ? t + 3 : a;                                   // boost cocok di judul
-    if(!s) return 0;                                           // tetap mode AND
+    const s = t ? t + 3 : a;
+    if(!s) return 0;
     sum += s;
   }
   return sum;
@@ -52,38 +79,19 @@ function ranked(words, idx){
     .map(x => x.e);
 }
 
-/* ============ Warna kategori: satu ramp (hue saja) ============
-   [utama, tint, gelap] — saturasi & kerlap seragam agar konsisten dgn brand. */
-const COL = {
- adminduk:["hsl(220,60%,42%)","hsl(220,58%,96%)","hsl(220,52%,30%)"],
- surat:["hsl(272,45%,45%)","hsl(272,52%,96%)","hsl(272,45%,32%)"],
- izin:["hsl(160,55%,31%)","hsl(160,52%,95%)","hsl(160,50%,23%)"],
- sosial:["hsl(24,65%,42%)","hsl(24,66%,96%)","hsl(24,58%,30%)"],
- rumah:["hsl(45,70%,33%)","hsl(45,72%,96%)","hsl(45,62%,26%)"],
- didik:["hsl(244,55%,45%)","hsl(244,58%,96%)","hsl(244,50%,31%)"],
- sehat:["hsl(350,55%,42%)","hsl(350,62%,96%)","hsl(350,50%,30%)"],
- kerja:["hsl(175,50%,33%)","hsl(175,52%,96%)","hsl(175,48%,25%)"],
- petugas:["hsl(215,30%,42%)","hsl(215,34%,96%)","hsl(215,28%,28%)"]
-};
-const cvars = g => { const [c,cs,cd] = COL[g]||COL.izin; return `--c:${c};--cs:${cs};--cd:${cd}`; };
-
-/* ============ Scrollspy ============ */
-let homeSpyIO = null;
-function rebindHomeSpy(){
-  if(homeSpyIO){ homeSpyIO.disconnect(); homeSpyIO = null; }
-  const btns = [...document.querySelectorAll("#catnav button")];
-  if(!btns.length || !("IntersectionObserver" in window)) return;
-  const ids = btns.map(b => "grp-" + b.dataset.g);
-  homeSpyIO = new IntersectionObserver(es => {
-    es.forEach(en => { if(en.isIntersecting){ const i = ids.indexOf(en.target.id); btns.forEach((b,j) => b.classList.toggle("on", i === j)); } });
-  }, { rootMargin: "-30% 0px -60% 0px" });
-  ids.forEach(id => { const el = document.getElementById(id); if(el) homeSpyIO.observe(el); });
-}
-
 /* ============ Beranda ============ */
-const SVCIDX = SVC.map(s => ({s, tt: toks(s.t), at: toks([s.t, s.d, s.tags || "", GROUPS.find(g => g[0] === s.g)[1]].join(" "))}));
+const SVCIDX = SVC.map(s => ({s, tt: toks(s.t), at: toks([s.t, s.d, s.tags || "", gname(s.g)].join(" "))}));
 function tileHTML(s){
-  return `<a class="tile${s.feat?" feat":""}" style="${cvars(s.g)}" href="#${s.id}"><div><b>${esc(s.t)}</b><small>${esc(s.d)}</small><span class="ch">${esc(s.ch)}</span></div></a>`;
+  return `<a class="tile${s.feat?" feat":""}" data-cat style="${cvars(s.g)}" href="#${s.id}"><b>${esc(s.t)}</b><small>${esc(s.d)}</small><span class="ch">${esc(s.ch)}</span>${IC("arrow-up-right","go")}</a>`;
+}
+function rwcardHTML(){
+  return `<div class="rwcard"><span class="rw-ic">${IC("building")}</span>
+    <div class="rwtop"><b>Bingung mulai dari mana? Datang ke Balai RW.</b><span>Petugas ASN di sana siap membantu menjawab pertanyaan Anda.</span></div>
+    <div class="rwfacts">
+      <div><small>Lokasi</small><b>Seluruh Kecamatan Wonokromo</b></div>
+      <div><small>Jam layanan</small><b>08.00 – 16.00 WIB</b></div>
+      <div><small>Biaya</small><b>Gratis</b></div>
+    </div></div>`;
 }
 function renderHome(){
   const raw = $("hq").value.trim(), term = norm(raw);
@@ -94,32 +102,45 @@ function renderHome(){
     const hs = ranked(words, SVCIDX).map(x => x.s);
     const ss = ranked(words, ALLIDX).map(x => x.it);
     let html = "";
-    if(hs.length) html += `<div class="res-h"><h3>${hs.length} panduan layanan</h3></div><div class="grid">${hs.map(tileHTML).join("")}</div>`;
+    if(hs.length) html += `<div class="res-h"><h3>${hs.length} panduan layanan</h3><button class="back" type="button" data-clear>${IC("x")} Hapus pencarian</button></div><div class="grid">${hs.map(tileHTML).join("")}</div>`;
     if(ss.length) html += `<div class="res-h"><h3>${ss.length} izin di SSW Alfa</h3></div><div class="results">${ss.slice(0,30).map(it=>sswItemHTML(it,true,true)).join("")}</div>`;
     if(!html) html = `<div class="empty" style="margin-top:14px">Belum ketemu untuk "<b>${esc(raw)}</b>". Coba kata lain, atau tanyakan langsung ke petugas di Balai RW.</div>`;
     out.innerHTML = html;
-    $("catnav").hidden = true;
-    if(homeSpyIO){ homeSpyIO.disconnect(); homeSpyIO = null; }
-    document.querySelectorAll("#catnav button").forEach(b => b.classList.remove("on"));
     return;
   }
-  let html = `<div class="rwcard"><div class="rwtop"><div><b>Bingung mulai dari mana? Datang ke Balai RW.</b><span>Petugas ASN di sana siap membantu menjawab pertanyaan Anda.</span></div></div><div class="rwfacts"><div><small>Lokasi</small><b>Balai RW di seluruh Kecamatan Wonokromo</b></div><div><small>Jam layanan</small><b>08.00 – 16.00 WIB</b></div><div><small>Biaya</small><b>Gratis</b></div></div></div>`;
+  let html = rwcardHTML();
   GROUPS.forEach(([g,label]) => {
     const list = SVC.filter(s=>s.g===g);
-    html += `<section id="grp-${g}" style="${cvars(g)}"><div class="sec-h"><h2>${esc(tidy(label))}</h2></div><div class="grid">${list.map(tileHTML).join("")}</div></section>`;
+    html += `<section id="grp-${g}" data-cat style="${cvars(g)}">
+      <div class="sec-h"><span class="sec-ic">${IC(gicon(g))}</span><div><h2>${esc(tidy(label))}</h2><p>${list.length} panduan layanan</p></div></div>
+      <div class="grid">${list.map(tileHTML).join("")}</div></section>`;
   });
   out.innerHTML = html;
-  $("catnav").hidden = false;
-  rebindHomeSpy();
 }
-$("catnav").innerHTML = GROUPS.map(([g,l])=>`<button type="button" style="${cvars(g)}" data-g="${g}">${esc(tidy(l))}</button>`).join("");
-$("catnav").querySelectorAll("button").forEach(b => b.onclick = () => { if($("hq").value){ $("hq").value=""; renderHome(); } const el=$("grp-"+b.dataset.g); if(el) el.scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}); });
-$("hstats").innerHTML = `<div><b>${SVC.length}</b><span>panduan layanan</span></div><div><b>${ALL.length}</b><span>izin di SSW Alfa</span></div><div><b>${GROUPS.length}</b><span>kategori</span></div>`;
-const HQUICK = [["🔎 Cek desil/gamis","cek gamis"],["📝 SKTM","sktm"],["🔐 Akun KNG","kng"],["📲 KTP digital","ikd"],["💒 Nikah","nikah"],["📊 Sanggah desil","desil"],["🆔 KTP hilang","ktp"],["📑 Akta","akta"],["⚖️ Ahli waris","waris"],["🎓 Beasiswa","beasiswa"],["💳 BPJS gratis","bpjs"],["🏚️ Bedah rumah","rutilahu"],["🛒 PKH / BPNT","pkh"],["🏪 NIB","nib"],["🏗️ IMB / PBG","imb"],["🧰 Cari kerja","kerja"]];
+
+/* Grid kategori + kategori footer */
+$("kgrid").innerHTML = GROUPS.map(([g,l]) => {
+  const n = SVC.filter(s=>s.g===g).length;
+  return `<button class="kcard" type="button" data-cat data-g="${g}" style="${cvars(g)}">
+    <span class="kcard-ic">${IC(gicon(g))}</span>
+    <span class="kcard-b"><b>${esc(tidy(l))}</b><small>${n} panduan</small></span>
+    ${IC("arrow-right","kcard-go")}</button>`;
+}).join("");
+$("footCats").innerHTML = GROUPS.map(([g,l]) => `<li><button type="button" data-g="${g}">${esc(tidy(l))}</button></li>`).join("");
+
+/* Chip cari cepat */
+const HQUICK = [["Cek desil/gamis","cek gamis"],["SKTM","sktm"],["Akun KNG","kng"],["KTP digital","ikd"],["Nikah","nikah"],["Sanggah desil","desil"],["KTP hilang","ktp"],["Akta","akta"],["Ahli waris","waris"],["Beasiswa","beasiswa"],["BPJS gratis","bpjs"],["Bedah rumah","rutilahu"],["PKH / BPNT","pkh"],["NIB","nib"],["IMB / PBG","imb"],["Cari kerja","kerja"]];
 $("hquick").innerHTML = HQUICK.map(([l,t])=>`<button type="button" data-t="${t}">${esc(tidy(l))}</button>`).join("");
-$("hquick").querySelectorAll("button").forEach(b => b.onclick = () => { $("hq").value = b.dataset.t; renderHome(); });
-$("hq").addEventListener("input", renderHome);
-$("hclr").onclick = () => { $("hq").value=""; renderHome(); $("hq").focus(); };
+$("hstats").innerHTML = `<div><b>${SVC.length}</b><span>panduan layanan</span></div><div><b>${ALL.length}</b><span>izin di SSW Alfa</span></div><div><b>${GROUPS.length}</b><span>kategori</span></div>`;
+
+/* ============ Pencarian global (hero + header) ============ */
+function setTerm(v){ $("hq").value = v; $("gq").value = v; renderHome(); }
+$("hq").addEventListener("input", e => { $("gq").value = e.target.value; renderHome(); });
+$("gq").addEventListener("input", e => { $("hq").value = e.target.value; renderHome(); });
+$("hclr").onclick = () => { setTerm(""); $("hq").focus(); };
+$("hquick").querySelectorAll("button").forEach(b => b.onclick = () => { setTerm(b.dataset.t); scrollToEl($("hout")); });
+$("hsearchHero").addEventListener("submit", e => e.preventDefault());
+$("hsearch").addEventListener("submit", e => { e.preventDefault(); $("gq").blur(); });
 
 /* ============ SSW finder ============ */
 const out = $("out"), q = $("q"), clr = $("clr");
@@ -131,7 +152,7 @@ function renderSSW(){
     const words = term.split(/\s+/).filter(Boolean);
     const hits = ranked(words, ALLIDX).map(x => x.it);
     const ossHint = /\b(oss|nib|rba|izin usaha|umk|umkm|usaha mikro|nomor induk berusaha)\b/.test(term);
-    out.innerHTML = (ossHint ? `<div class="callout" style="margin-bottom:10px"><span>Izin usaha seperti NIB diurus lewat <b>OSS RBA</b>, bukan SSW Alfa. <a href="#oss">Lihat caranya →</a></span></div>` : "") +
+    out.innerHTML = (ossHint ? `<div class="callout">${IC("sparkle")}<span>Izin usaha seperti NIB diurus lewat <b>OSS RBA</b>, bukan SSW Alfa. <a href="#oss">Lihat caranya ${IC("arrow-right")}</a></span></div>` : "") +
       `<div class="res-h" style="margin-top:0"><h3>${hits.length} layanan cocok</h3></div>` +
       (hits.length ? `<div class="results">${hits.map(h=>sswItemHTML(h,true,false)).join("")}</div>`
        : `<div class="empty">Belum ketemu untuk "<b>${esc(q.value.trim())}</b>". Coba kata lain, pilih kategori, atau tanya DPMPTSP lewat kontak di bawah.</div>`);
@@ -139,7 +160,7 @@ function renderSSW(){
   }
   if(cat !== null){
     const c = CATS[cat];
-    out.innerHTML = `<div class="res-h" style="margin-top:0"><h3>${esc(c.n)}</h3><button class="back" type="button" id="backBtn">Semua kategori</button></div>
+    out.innerHTML = `<div class="res-h" style="margin-top:0"><h3>${esc(c.n)}</h3><button class="back" type="button" id="backBtn">${IC("arrow-left")} Semua kategori</button></div>
       <div class="results">${c.s.map(([n,r])=>sswItemHTML({n,r},false,false)).join("")}</div>`;
     $("backBtn").onclick = () => { cat = null; renderSSW(); };
     return;
@@ -147,13 +168,13 @@ function renderSSW(){
   out.innerHTML = `<div class="cats">${CATS.map((c,i)=>`<button class="cat" type="button" data-i="${i}"><b>${esc(c.n)}</b><small>${c.s.length} layanan</small></button>`).join("")}</div>`;
   out.querySelectorAll(".cat").forEach(b => b.onclick = () => { cat = +b.dataset.i; renderSSW(); out.scrollIntoView({block:"nearest"}); });
 }
-const QUICK = [["🏗️ IMB / PBG","pbg"],["🎓 Magang / PKL","magang"],["📢 Reklame","reklame"],["🌳 Tebang pohon","pohon"],["⚽ Sewa lapangan","lapangan"],["🏫 Izin sekolah","sekolah"],["🗺️ Surat ijo","surat ijo"],["⚖️ Tera timbangan","timbangan"]];
+const QUICK = [["IMB / PBG","pbg"],["Magang / PKL","magang"],["Reklame","reklame"],["Tebang pohon","pohon"],["Sewa lapangan","lapangan"],["Izin sekolah","sekolah"],["Surat ijo","surat ijo"],["Tera timbangan","timbangan"]];
 $("quick").innerHTML = QUICK.map(([l,t])=>`<button type="button" data-t="${t}">${esc(tidy(l))}</button>`).join("");
 $("quick").querySelectorAll("button").forEach(b => b.onclick = () => { q.value = b.dataset.t; cat = null; renderSSW(); });
 q.addEventListener("input", () => { cat = null; renderSSW(); });
 clr.onclick = () => { q.value = ""; renderSSW(); q.focus(); };
 
-/* ============ Checklist (disimpan per perangkat) ============ */
+/* ============ Checklist (tersimpan per perangkat) ============ */
 const KEY = "sswalfa-check-v1";
 let saved = {};
 try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch(e) {}
@@ -191,44 +212,101 @@ const UPDATED = "Oktober 2026";
 function shareHTML(id, title, cls){
   const url = SITE + "#" + id;
   const txt = encodeURIComponent(`${title} – panduan dari Pelayanan Balai RW Kecamatan Wonokromo:\n${url}`);
-  return `<div class="share ${cls||""}"><span>Bantu warga lain:</span><a class="btn wa" href="https://wa.me/?text=${txt}" target="_blank" rel="noopener">Bagikan ke WhatsApp</a><button class="btn cp" type="button" data-link="${url}">Salin link</button></div>`;
+  return `<div class="share ${cls||""}"><span>Bantu warga lain:</span><a class="btn wa" href="https://wa.me/?text=${txt}" target="_blank" rel="noopener">${IC("chat")} Bagikan ke WhatsApp</a><button class="btn cp" type="button" data-link="${url}">${IC("copy")} Salin link</button></div>`;
 }
-document.addEventListener("click", e => {
-  const b = e.target.closest(".share .cp"); if(!b) return;
-  const v = b.dataset.link;
-  try { navigator.clipboard.writeText(v).then(()=>toast("Link disalin"), ()=>toast(v)); } catch(err){ toast(v); }
-});
 
 /* ============ Halaman layanan umum ============ */
 function linkHTML([label,url]){
   const ext = /^https?:/.test(url);
-  return `<a class="btn ${ext?"btn-gold":"back"}" style="font-size:14px" href="${esc(url)}"${ext?' target="_blank" rel="noopener"':""}>${esc(tidy(label))}</a>`;
+  return `<a class="btn ${ext?"":"back"}" style="font-size:14px" href="${esc(url)}"${ext?' target="_blank" rel="noopener"':""}>${esc(tidy(label))} ${IC(ext?"arrow-up-right":"chevron-right")}</a>`;
 }
 function renderSvc(s){
-  const [c,cs,cd] = COL[s.g]||COL.izin;
   const hero = $("svcHead").parentElement;
-  hero.style.setProperty("--h1", cd); hero.style.setProperty("--h2", c);
+  hero.setAttribute("data-cat", "");
+  hero.setAttribute("style", cvars(s.g));
+  $("svcBody").setAttribute("data-cat", "");
   $("svcBody").setAttribute("style", cvars(s.g));
-  $("svcHead").innerHTML = `<div class="eyebrow">${esc(tidy(GROUPS.find(g=>g[0]===s.g)[1]))}</div>
-    <h1>${esc(s.t)}</h1><p>${esc(s.d)}</p>
-    <div class="chips"><span>${esc(s.ch)}</span>${s.steps?`<span>${s.steps.length} langkah</span>`:""}</div>`;
+  const crumb = (h) => `<nav class="crumbs"><a href="#beranda">Beranda</a>${IC("chevron-right")}<button type="button" data-g="${s.g}">${esc(gname(s.g))}</button>${IC("chevron-right")}<span>${esc(s.t)}</span></nav>`;
+  $("svcHead").innerHTML = `<div class="eyebrow">${IC(gicon(s.g))} ${esc(gname(s.g))}</div>
+    <h1>${esc(s.t)}</h1><p class="lead">${esc(s.d)}</p>
+    <div class="chips"><span>${esc(s.ch)}</span>${s.steps?`<span>${s.steps.length} langkah</span>`:""}</div>${crumb(s)}`;
   let h = "", side = "";
-  if(s.who) h += `<div class="block o1"><h3>Untuk siapa</h3><ul>${s.who.map(x=>`<li>${esc(tidy(x))}</li>`).join("")}</ul></div>`;
-  if(s.cases) side += `<div class="block o2"><h3>Syarat sesuai keperluan</h3>${s.cases.map(([t,items],ci)=>`<details class="x"${(ci===0||s.allOpen)?" open":""}><summary>${esc(tidy(t))}</summary>${items.map((x,i)=>`<label class="check"><input type="checkbox" id="c-${s.id}-${ci}-${i}"><span>${esc(tidy(x))}</span></label>`).join("")}</details>`).join("")}</div>`;
-  if(s.bring) side +=`<div class="block o2"><h3>Yang perlu disiapkan</h3>${s.bring.map((x,i)=>`<label class="check"><input type="checkbox" id="b-${s.id}-${i}"><span>${esc(tidy(x))}</span></label>`).join("")}
-    ${(s.extra||[]).map(([t,items])=>`<details class="x"><summary>${esc(tidy(t))}</summary><ul>${items.map(x=>`<li>${esc(tidy(x))}</li>`).join("")}</ul></details>`).join("")}</div>`;
-  else if(s.extra) h += `<div class="block o3"><h3>Rincian</h3>${s.extra.map(([t,items])=>`<details class="x" open><summary>${esc(tidy(t))}</summary><ul>${items.map(x=>`<li>${esc(tidy(x))}</li>`).join("")}</ul></details>`).join("")}</div>`;
-  if(s.steps) h += `<div class="block o3"><h3>Alurnya</h3><ol class="flow">${s.steps.map(([w,t],i)=>`<li><span class="n">${i+1}</span><div><span class="who">${esc(tidy(w))}</span><p>${esc(tidy(t))}</p></div></li>`).join("")}</ol></div>`;
-  if(s.kv) side += `<div class="block o4"><h3>${esc(tidy(s.kvTitle||"Info"))}</h3><div class="kv">${s.kv.map(([k,v])=>`<span>${esc(tidy(k))}</span><b>${esc(tidy(v))}</b>`).join("")}</div>${s.kvNote?`<p class="src-note">${esc(tidy(s.kvNote))}</p>`:""}</div>`;
-  if(s.sections) h += s.sections.map(([t,items])=>`<div class="block o5"><h3>${esc(tidy(t))}</h3><ul>${items.map(x=>`<li>${esc(tidy(x))}</li>`).join("")}</ul></div>`).join("");
-  if(s.notes) h += `<div class="block o5"><h3>Perlu diketahui</h3>${s.notes.map(([k,t])=>`<div class="tip ${k}"><span>${tidy(t)}</span></div>`).join("")}</div>`;
-  if(s.contacts) side += `<div class="block o6"><h3>Kontak</h3>${s.contacts.map(([e,l,v,cp,url])=>`<div class="row"><div><small>${esc(tidy(l))}</small><b>${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(v)}</a>`:esc(v)}</b></div>${cp?`<button class="copy" type="button" data-copy="${esc(cp)}">Salin</button>`:""}</div>`).join("")}</div>`;
+  const blk = (cls, ic, title, body) => `<div class="block ${cls}"><h3><span class="b-ic">${IC(ic)}</span>${esc(title)}</h3>${body}</div>`;
+  if(s.who) h += blk("o1","users","Untuk siapa", `<ul>${s.who.map(x=>`<li>${esc(tidy(x))}</li>`).join("")}</ul>`);
+  if(s.cases) side += blk("o2","list","Syarat sesuai keperluan", s.cases.map(([t,items],ci)=>`<details class="x"${(ci===0||s.allOpen)?" open":""}><summary>${esc(tidy(t))}</summary>${items.map((x,i)=>`<label class="check"><input type="checkbox" id="c-${s.id}-${ci}-${i}"><span>${esc(tidy(x))}</span></label>`).join("")}</details>`).join(""));
+  if(s.bring) side += blk("o2","list","Yang perlu disiapkan", s.bring.map((x,i)=>`<label class="check"><input type="checkbox" id="b-${s.id}-${i}"><span>${esc(tidy(x))}</span></label>`).join("") +
+    ((s.extra||[]).map(([t,items])=>`<details class="x"><summary>${esc(tidy(t))}</summary><ul>${items.map(x=>`<li>${esc(tidy(x))}</li>`).join("")}</ul></details>`).join("")));
+  else if(s.extra) h += blk("o3","book","Rincian", s.extra.map(([t,items])=>`<details class="x" open><summary>${esc(tidy(t))}</summary><ul>${items.map(x=>`<li>${esc(tidy(x))}</li>`).join("")}</ul></details>`).join(""));
+  if(s.steps) h += blk("o3","route","Alurnya", `<ol class="flow">${s.steps.map(([w,t],i)=>`<li><span class="n">${i+1}</span><div><span class="who">${esc(tidy(w))}</span><p>${esc(tidy(t))}</p></div></li>`).join("")}</ol>`);
+  if(s.kv) side += blk("o4","info", tidy(s.kvTitle||"Info"), `<div class="kv">${s.kv.map(([k,v])=>`<span>${esc(tidy(k))}</span><b>${esc(tidy(v))}</b>`).join("")}</div>${s.kvNote?`<p class="src-note">${esc(tidy(s.kvNote))}</p>`:""}`);
+  if(s.sections) h += s.sections.map(([t,items])=>blk("o5","list", tidy(t), `<ul>${items.map(x=>`<li>${esc(tidy(x))}</li>`).join("")}</ul>`)).join("");
+  if(s.notes) h += blk("o5","info","Perlu diketahui", s.notes.map(([k,t])=>`<div class="tip ${k}">${IC(k==="warn"?"alert":"info")}<span>${tidy(t)}</span></div>`).join(""));
+  if(s.contacts) side += blk("o6","phone","Kontak", s.contacts.map(([e,l,v,cp,url])=>`<div class="row"><span class="row-ic">${IC(iconFor(l))}</span><div><small>${esc(tidy(l))}</small><b>${url?`<a href="${esc(url)}" target="_blank" rel="noopener">${esc(v)}</a>`:esc(v)}</b></div>${cp?`<button class="copy" type="button" data-copy="${esc(cp)}">Salin</button>`:""}</div>`).join(""));
   if(s.links) side += `<div class="chips o7" style="margin-top:14px">${s.links.map(linkHTML).join("")}</div>`;
   h += shareHTML(s.id, s.t, "o8");
-  h += `<p class="src-note o8">Sumber: ${esc(s.src)}. · Info diperbarui ${UPDATED}.</p>`;
+  h += `<p class="src-note o8">${IC("book")} Sumber: ${esc(s.src)}. · Diperbarui ${UPDATED}.</p>`;
   const body = $("svcBody");
   body.innerHTML = side ? `<div class="dgrid"><div class="dmain">${h}</div><aside class="dside">${side}</aside></div>` : `<div class="dgrid solo"><div class="dmain">${h}</div></div>`;
   wireBoxes(body); bindCopy(body);
+}
+
+/* ============ Shell: header, tema, drawer, navigasi ============ */
+const head = $("head"), drawer = $("drawer"), menuBtn = $("menuBtn"), sbtn = $("sbtn");
+function closeDrawer(){ if(drawer.hidden) return; drawer.hidden = true; menuBtn.setAttribute("aria-expanded","false"); document.body.style.overflow = ""; }
+function openDrawer(){ drawer.hidden = false; menuBtn.setAttribute("aria-expanded","true"); document.body.style.overflow = "hidden"; }
+menuBtn.onclick = () => drawer.hidden ? openDrawer() : closeDrawer();
+drawer.addEventListener("click", e => { if(e.target === drawer) closeDrawer(); });
+sbtn.onclick = () => {
+  const open = head.classList.toggle("search-open");
+  sbtn.setAttribute("aria-expanded", open);
+  if(open) $("gq").focus(); else $("gq").blur();
+};
+document.addEventListener("keydown", e => {
+  if(e.key !== "Escape") return;
+  closeDrawer();
+  if(head.classList.contains("search-open")){ head.classList.remove("search-open"); sbtn.setAttribute("aria-expanded","false"); }
+});
+/* Tema */
+const THEME_KEY = "brw-theme";
+function applyTheme(t){
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem(THEME_KEY, t); } catch(e) {}
+  $("themeBtn").setAttribute("aria-pressed", t === "dark");
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if(meta) meta.setAttribute("content", t === "dark" ? "#0A1411" : "#065F46");
+}
+$("themeBtn").onclick = () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark");
+applyTheme(document.documentElement.dataset.theme || "light");
+/* Kembali ke atas */
+$("totop").onclick = () => window.scrollTo({ top: 0, behavior: smooth() });
+/* delegated: kategori, section, hapus pencarian, tab */
+document.addEventListener("click", e => {
+  const grp = e.target.closest("[data-g]");
+  if(grp){ closeDrawer(); goGroup(grp.dataset.g); return; }
+  const go = e.target.closest("[data-go]");
+  if(go){ closeDrawer(); goSection(go.dataset.go); return; }
+  const clr2 = e.target.closest("[data-clear]");
+  if(clr2){ setTerm(""); scrollToEl($("kategori")); return; }
+  const cp = e.target.closest(".share .cp");
+  if(cp){
+    const v = cp.dataset.link;
+    try { navigator.clipboard.writeText(v).then(()=>toast("Link disalin"), ()=>toast(v)); } catch(err){ toast(v); }
+    return;
+  }
+  const j = e.target.closest("[data-jump]");
+  if(j){ scrollToEl($(j.dataset.jump)); }
+});
+function ensureBeranda(cb){
+  if(location.hash.slice(1) === "beranda"){ cb(); return; }
+  location.hash = "beranda";
+  setTimeout(cb, 90);
+}
+function goGroup(g){
+  if($("hq").value) setTerm("");
+  ensureBeranda(() => scrollToEl($("grp-" + g)));
+}
+function goSection(id){
+  ensureBeranda(() => scrollToEl($(id)));
 }
 
 /* ============ Router ============ */
@@ -238,15 +316,22 @@ const VIEW_DESC = {
   ssw: "Panduan SSW Alfa Surabaya: buat akun, ajukan izin online, pantau status, revisi berkas, dan telusuri 17 kategori layanan.",
   oss: "Cara buat akun OSS dan NIB usaha mikro gratis di oss.go.id, bisa didampingi petugas di Balai RW Kecamatan Wonokromo."
 };
+function setNav(view){
+  const key = view === "svc" ? "" : view;
+  $$("[data-nav]").forEach(a => {
+    const on = a.dataset.nav === key;
+    a.classList.toggle("on", on);
+    if(on) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
+  });
+}
 function route(){
   const id = (location.hash||"").slice(1) || "beranda";
   let view = "beranda";
   if(id==="ssw"||id==="oss") view = id;
   else if(SVCMAP[id]){ view = "svc"; renderSvc(SVCMAP[id]); }
   document.querySelectorAll("[data-view]").forEach(v => v.hidden = v.dataset.view !== view);
-  $("backLink").hidden = view === "beranda";
+  setNav(view);
   window.scrollTo(0,0);
-  /* Judul & deskripsi per halaman (riwayat back-button + SEO) */
   const svc = SVCMAP[id];
   document.title = svc ? (svc.t + " – " + BRW)
     : view === "ssw" ? ("Panduan SSW Alfa – " + BRW)
@@ -255,15 +340,16 @@ function route(){
   const md = document.querySelector('meta[name="description"]');
   if(md) md.setAttribute("content", svc ? svc.d : (VIEW_DESC[view] || DEFAULT_DESC));
 }
-document.querySelectorAll("[data-jump]").forEach(b => b.onclick = () => $(b.dataset.jump).scrollIntoView({behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}));
 window.addEventListener("hashchange", route);
+
+/* ============ Init ============ */
 bindCopy(document);
 $("sswShare").innerHTML = shareHTML("ssw","Panduan SSW Alfa");
 $("ossShare").innerHTML = shareHTML("oss","Cara buat akun OSS & NIB Usaha Mikro");
 renderHome(); renderSSW(); update(); route();
-/* Scrollspy untuk tab SSW (instan, tanpa animasi) */
+/* Scrollspy tab SSW (instan, tanpa animasi) */
 (() => {
-  const btns = [...document.querySelectorAll("nav.tabs [data-jump]")];
+  const btns = $$("nav.tabs [data-jump]");
   const ids = btns.map(b => b.dataset.jump);
   if(!btns.length || !("IntersectionObserver" in window)) return;
   const io = new IntersectionObserver(es => {

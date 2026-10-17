@@ -1,8 +1,8 @@
 // Runs the actual search-scoring block from assets/app.js as one blob (no DOM needed)
 const fs = require('fs');
 const src = fs.readFileSync(__dirname + '/../assets/app.js', 'utf8');
-const start = src.indexOf('/* Pencarian: token-prefiks');
-const end = src.indexOf('/* ============ Warna kategori');
+const start = src.indexOf('const toks = s =>');
+const end = src.indexOf('/* ====', start);
 const block = src.slice(start, end);
 
 const code = `
