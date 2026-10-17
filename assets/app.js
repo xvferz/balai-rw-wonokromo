@@ -298,6 +298,19 @@ function goGroup(g){
 function goSection(id){
   ensureBeranda(() => scrollToEl($(id)));
 }
+/* Sorot navigasi mengikuti bagian yang sedang terlihat (hanya di beranda) */
+let navTick = false;
+function navSpy(){
+  navTick = false;
+  if(((location.hash || "").slice(1) || "beranda") !== "beranda") return;
+  const help = $("bantuan").getBoundingClientRect();
+  if(help.top < window.innerHeight * 0.6) markNav("bantuan");
+  else if(window.scrollY > 240) markNav("layanan");
+  else markNav("beranda");
+}
+window.addEventListener("scroll", () => {
+  if(!navTick){ navTick = true; requestAnimationFrame(navSpy); }
+}, { passive: true });
 
 /* ============ Router ============ */
 const BRW = "Pelayanan Balai RW Wonokromo";
@@ -306,13 +319,26 @@ const VIEW_DESC = {
   ssw: "Panduan SSW Alfa Surabaya: buat akun, ajukan izin online, pantau status, revisi berkas, dan telusuri 17 kategori layanan.",
   oss: "Cara buat akun OSS dan NIB usaha mikro gratis di oss.go.id, bisa didampingi petugas di Balai RW Kecamatan Wonokromo."
 };
-function setNav(view){
-  const key = view === "svc" ? "" : view;
+function markNav(key){
   $$("[data-nav]").forEach(a => {
     const on = a.dataset.nav === key;
     a.classList.toggle("on", on);
     if(on) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
   });
+}
+function setNav(view){ markNav(view === "beranda" ? "beranda" : "layanan"); }
+/* Logo + palet halaman mengikuti warna kategori */
+function setPageHue(g){
+  const root = document.documentElement, hue = g && HUE[g];
+  if(hue){
+    root.dataset.hue = g;
+    root.style.setProperty("--page-h", hue[0]);
+    root.style.setProperty("--page-s", hue[1] + "%");
+  } else {
+    delete root.dataset.hue;
+    root.style.removeProperty("--page-h");
+    root.style.removeProperty("--page-s");
+  }
 }
 /* Logo mark mengikuti warna kategori halaman yang sedang dibuka */
 function setMark(g){
@@ -335,6 +361,7 @@ function route(){
   document.querySelectorAll("[data-view]").forEach(v => v.hidden = v.dataset.view !== view);
   setNav(view);
   setMark(svc ? svc.g : null);
+  setPageHue(svc ? svc.g : null);
   window.scrollTo(0,0);
   document.title = svc ? (svc.t + " – " + BRW)
     : view === "ssw" ? ("Panduan SSW Alfa – " + BRW)

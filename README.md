@@ -61,6 +61,13 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
   (hijau emerald di beranda/SSW/OSS, warna kategori di halaman layanan), navigasi dipersempit
   jadi **Beranda · Layanan · Bantuan**, dan latar halaman diberi gradasi hijau samar +
   titik halus di bagian atas.
+- **Palet ikut banner (v7)**:
+  - Di halaman layanan, **mode gelap ikut warna kategori**: latar, kartu, garis, teks, dan
+    cahaya latar semuanya ditintu dari hue halaman yang sedang dibuka.
+  - Sorot navigasi (pill bercahaya) mengikuti item yang sedang aktif, dan **ikut warna halaman**;
+    di beranda ia bergeser sendiri saat menggulir (atas → *Beranda*, bagian kategori → *Layanan*,
+    footer kontak → *Bantuan*).
+  - Grup navigasi + tombol tema digeser sedikit ke kanan (jarak tetap 16px dari logo/ikon).
 - **Desain v3 "Ikon & Navigasi"**:
   - **Ikon SVG line-art** sebagai satu sprite inline (`<symbol>` + `<use>`), 39 ikon —
     dipakai di header, kartu kategori, judul seksi, baris kontak, footer, dan langkah.

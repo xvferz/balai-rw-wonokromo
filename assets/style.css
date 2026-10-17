@@ -21,6 +21,9 @@
   /* Bentuk & bayangan */
   --r-xs:8px; --r-sm:12px; --r-md:16px; --r-lg:22px; --pill:999px;
   --mark-a:#12B981; --mark-b:#065F46;
+  /* cahaya latar + sorot navigasi */
+  --blob-1:rgba(14,159,110,.075); --blob-2:rgba(14,159,110,.055); --blob-3:rgba(14,159,110,.05);
+  --nav-glow:var(--brand-soft); --nav-glow-ink:var(--brand-ink);
   --sh-1:0 1px 2px rgba(13,35,26,.05), 0 10px 26px -18px rgba(13,35,26,.28);
   --sh-2:0 2px 6px rgba(13,35,26,.06), 0 18px 38px -20px rgba(13,35,26,.34);
   --ring:0 0 0 4px rgba(14,159,110,.16);
@@ -48,6 +51,30 @@
   --ring:0 0 0 4px rgba(52,206,149,.18);
   --cat-l:52%; --cat-t:15%; --cat-d:74%; --satf:.72;
 }
+/* Halaman layanan: seluruh palet (terutama mode gelap) ikut warna banner */
+[data-hue]{
+  --blob-1:hsl(var(--page-h) calc(var(--page-s) * .55) 42% / .16);
+  --blob-2:hsl(var(--page-h) calc(var(--page-s) * .5) 40% / .12);
+  --blob-3:hsl(var(--page-h) calc(var(--page-s) * .45) 40% / .1);
+  --nav-glow:hsl(var(--page-h) calc(var(--page-s) * .6) 95%);
+  --nav-glow-ink:hsl(var(--page-h) calc(var(--page-s) * .8) 28%);
+}
+[data-theme="dark"][data-hue]{
+  --bg:hsl(var(--page-h) calc(var(--page-s) * .34) 6.5%);
+  --band:hsl(var(--page-h) calc(var(--page-s) * .3) 9%);
+  --surface:hsl(var(--page-h) calc(var(--page-s) * .26) 10.5%);
+  --surface-2:hsl(var(--page-h) calc(var(--page-s) * .24) 13.5%);
+  --line:hsl(var(--page-h) calc(var(--page-s) * .3) 18%);
+  --line-2:hsl(var(--page-h) calc(var(--page-s) * .3) 25%);
+  --ink:hsl(var(--page-h) 22% 92%);
+  --ink-2:hsl(var(--page-h) 16% 79%);
+  --muted:hsl(var(--page-h) 12% 64%);
+  --nav-glow:hsl(var(--page-h) calc(var(--page-s) * .45) 16%);
+  --nav-glow-ink:hsl(var(--page-h) calc(var(--page-s) * .5) 80%);
+  --blob-1:hsl(var(--page-h) calc(var(--page-s) * .55) 40% / .3);
+  --blob-2:hsl(var(--page-h) calc(var(--page-s) * .5) 38% / .22);
+  --blob-3:hsl(var(--page-h) calc(var(--page-s) * .45) 38% / .18);
+}
 /* Warna kategori turunan */
 [data-cat]{
   --c:hsl(var(--ch), var(--csat), var(--cat-l));
@@ -59,9 +86,9 @@
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
 body{margin:0;background:
-  radial-gradient(760px 340px at 6% -6%, rgba(14,159,110,.075), transparent 62%),
-  radial-gradient(820px 380px at 102% 10%, rgba(14,159,110,.055), transparent 60%),
-  radial-gradient(700px 320px at 50% 104%, rgba(14,159,110,.05), transparent 60%),
+  radial-gradient(760px 340px at 6% -6%, var(--blob-1), transparent 62%),
+  radial-gradient(820px 380px at 102% 10%, var(--blob-2), transparent 60%),
+  radial-gradient(700px 320px at 50% 104%, var(--blob-3), transparent 60%),
   var(--bg);color:var(--ink);font-family:var(--f-body);font-size:var(--t-base);line-height:1.6;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
 /* tekstur titik sangat samar di bagian atas halaman */
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.7;
@@ -112,8 +139,8 @@ section{padding-top:34px;scroll-margin-top:118px}
 .logo-txt strong{font:800 15.5px var(--f-display);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .logo-txt em{font:600 var(--t-2xs) var(--f-body);font-style:normal;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mainnav{display:none;margin-left:auto;align-items:center;gap:2px}
-.mainnav a,.mainnav button{display:inline-flex;align-items:center;gap:6px;font:700 var(--t-sm) var(--f-body);color:var(--ink-2);background:none;border:0;padding:9px 13px;border-radius:var(--pill);cursor:pointer;text-decoration:none;white-space:nowrap}
-.mainnav a.on,.mainnav button.on,.mainnav a[aria-current="page"]{background:var(--brand-soft);color:var(--brand-ink)}
+.mainnav a,.mainnav button{display:inline-flex;align-items:center;gap:6px;font:700 var(--t-sm) var(--f-body);color:var(--ink-2);background:none;border:0;padding:9px 15px;border-radius:var(--pill);cursor:pointer;text-decoration:none;white-space:nowrap}
+.mainnav a.on,.mainnav button.on,.mainnav a[aria-current="page"]{background:var(--nav-glow);color:var(--nav-glow-ink);box-shadow:0 0 0 1px color-mix(in srgb,var(--nav-glow-ink) 18%,transparent) inset}
 .head-tools{display:flex;align-items:center;gap:8px;margin-left:auto}
 .ibtn{width:40px;height:40px;border-radius:var(--pill);display:grid;place-items:center;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2);cursor:pointer;transition:background .12s,color .12s}
 .ibtn .ic{width:19px;height:19px}
@@ -442,6 +469,7 @@ details.x ul{margin:2px 0 8px;font-size:var(--t-md)}
   .wrap{max-width:1200px;padding-inline:32px}
   .head-bar{min-height:70px}
   .mainnav{display:flex}
+  .head-tools{margin-left:16px}
   #sbtn{display:none}
   .burger{display:none}
   .hero{padding-block:52px 56px;border-radius:0 0 34px 34px}
