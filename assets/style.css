@@ -452,6 +452,19 @@ details.x ul{margin:2px 0 8px;font-size:var(--t-md)}
 .foot-note{margin-top:14px}
 .foot-note p{margin:0;font-size:var(--t-xs);color:var(--foot-dim);max-width:90ch}
 
+/* ============ TEMPORARY: pemilih font (hapus setelah memilih) ============ */
+.fontbtn{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);z-index:80;width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:800 15px var(--f-body);cursor:pointer;box-shadow:var(--sh-2);display:grid;place-items:center}
+.fontbtn:hover{border-color:var(--brand);color:var(--brand-ink)}
+.fontbtn.on{background:var(--brand);color:var(--on-brand);border-color:transparent}
+.fontpanel{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);z-index:81;width:min(320px,calc(100vw - 28px));max-height:min(72vh,500px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh-2);padding:10px}
+.fontpanel h4{font:800 var(--t-2xs) var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:6px 8px 8px;margin:0}
+.fontopt{display:flex;flex-direction:column;gap:3px;width:100%;text-align:left;background:none;border:0;border-radius:12px;padding:10px 12px;cursor:pointer;color:var(--ink)}
+.fontopt:hover{background:var(--surface-2)}
+.fontopt.on{background:var(--brand-soft);box-shadow:inset 0 0 0 1px var(--brand)}
+.fontopt b{font-size:15px;font-weight:700;font-family:var(--fo-head,system-ui,sans-serif);line-height:1.2}
+.fontopt span{font-size:var(--t-sm);color:var(--muted);font-family:var(--fo-body,system-ui,sans-serif);line-height:1.35}
+.fontopt em{font-style:normal;font-size:var(--t-2xs);color:var(--brand-ink);font-weight:700;margin-left:6px}
+
 /* ============ Toast ============ */
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:var(--pill);font-size:var(--t-md);font-weight:700;opacity:0;transition:opacity .2s;pointer-events:none;z-index:99;max-width:calc(100vw - 40px);text-align:center;box-shadow:var(--sh-2)}
 

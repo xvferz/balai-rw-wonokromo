@@ -383,6 +383,67 @@ function route(){
 }
 window.addEventListener("hashchange", route);
 
+/* ============================================================================
+   TEMPORARY: pemilih font — hapus blok ini beserta .fontbtn/.fontpanel di
+   index.html dan rules .font* di style.css setelah Anda memilih font.
+   ============================================================================ */
+const FONTS = [
+  { id:"jakarta", name:"Plus Jakarta Sans", head:"Bricolage Grotesque", body:"Plus Jakarta Sans", note:"sekarang" },
+  { id:"inter", name:"Inter", head:"Inter", body:"Inter", note:"netral,modern" },
+  { id:"publicsans", name:"Public Sans", head:"Public Sans", body:"Public Sans", note:"gaya layanan publik" },
+  { id:"sourcesans", name:"Source Sans 3 + Source Serif 4", head:"Source Serif 4", body:"Source Sans 3", note:"judul serif" },
+  { id:"nunito", name:"Nunito Sans", head:"Nunito Sans", body:"Nunito Sans", note:"h bulat, ramah" },
+  { id:"plex", name:"IBM Plex Sans", head:"IBM Plex Sans", body:"IBM Plex Sans", note:"teknis, rapi" },
+  { id:"lato", name:"Lato", head:"Lato", body:"Lato", note:"klasik, hangat" },
+  { id:"worksans", name:"Work Sans", head:"Work Sans", body:"Work Sans", note:"ringan, modern" },
+  { id:"poppins", name:"Poppins", head:"Poppins", body:"Poppins", note:"geometris" },
+  { id:"figtree", name:"Figtree", head:"Figtree", body:"Figtree", note:"modern, bersih" }
+];
+const FONT_KEY = "brw-font";
+function loadFontCSS(){
+  if(document.getElementById("fontcss")) return;
+  const fams = [...new Set(FONTS.flatMap(f => [f.head, f.body]))];
+  const q = fams.map(n => "family=" + encodeURIComponent(n).replace(/%20/g, "+") + ":wght@400;500;600;700").join("&");
+  const l = document.createElement("link");
+  l.id = "fontcss"; l.rel = "stylesheet";
+  l.href = "https://fonts.googleapis.com/css2?" + q + "&display=swap";
+  document.head.appendChild(l);
+}
+function applyFont(id){
+  const f = FONTS.find(x => x.id === id) || FONTS[0];
+  const root = document.documentElement;
+  root.style.setProperty("--f-display", `"${f.head}", "Plus Jakarta Sans", system-ui, sans-serif`);
+  root.style.setProperty("--f-body", `"${f.body}", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif`);
+  try { localStorage.setItem(FONT_KEY, f.id); } catch(e) {}
+  $$(".fontopt").forEach(b => b.classList.toggle("on", b.dataset.f === f.id));
+}
+$("fontList").innerHTML = FONTS.map(f => `<button class="fontopt" type="button" data-f="${f.id}" style="--fo-head:'${f.head}';--fo-body:'${f.body}'"><b>${esc(f.name)}${f.note ? "<em>" + esc(f.note) + "</em>" : ""}</b><span>Balai RW Wonokromo — panduan layanan warga</span></button>`).join("");
+$$(".fontopt").forEach(b => b.onclick = () => { applyFont(b.dataset.f); toast("Font: " + FONTS.find(f => f.id === b.dataset.f).name); });
+$("fontBtn").onclick = () => {
+  const p = $("fontPanel"), open = p.hidden;
+  p.hidden = !open;
+  $("fontBtn").classList.toggle("on", open);
+  if(open) loadFontCSS();
+};
+document.addEventListener("click", e => {
+  const p = $("fontPanel");
+  if(p.hidden) return;
+  if(!e.target.closest("#fontPanel") && !e.target.closest("#fontBtn")){
+    p.hidden = true; $("fontBtn").classList.remove("on");
+  }
+});
+document.addEventListener("keydown", e => {
+  if(e.key === "Escape" && !$("fontPanel").hidden){ $("fontPanel").hidden = true; $("fontBtn").classList.remove("on"); }
+});
+{
+  const qf = new URLSearchParams(location.search).get("f");
+  let saved = null;
+  try { saved = localStorage.getItem(FONT_KEY); } catch(e) {}
+  if(qf && FONTS.some(f => f.id === qf)) { applyFont(qf); loadFontCSS(); }
+  else if(saved && FONTS.some(f => f.id === saved)) applyFont(saved);
+}
+/* ===================== END TEMPORARY: pemilih font ===================== */
+
 /* ============ Init ============ */
 bindCopy(document);
 $("sswShare").innerHTML = shareHTML("ssw","Panduan SSW Alfa");
