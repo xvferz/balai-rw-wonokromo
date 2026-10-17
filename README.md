@@ -57,6 +57,10 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
   - Saat mengetik pencarian, grid kategori disembunyikan agar fokus ke hasil.
   - Penandaan "kartu unggulan" (warna oranye) dihapus — semua kartu sama.
   - Kolom pencarian di header dan chip "Cari cepat" dihapus; pencarian hanya di banner.
+- **Detail kecil (v6)**: logo mark di header mengikuti warna kategori halaman yang dibuka
+  (hijau emerald di beranda/SSW/OSS, warna kategori di halaman layanan), navigasi dipersempit
+  jadi **Beranda · Layanan · Bantuan**, dan latar halaman diberi gradasi hijau samar +
+  titik halus di bagian atas.
 - **Desain v3 "Ikon & Navigasi"**:
   - **Ikon SVG line-art** sebagai satu sprite inline (`<symbol>` + `<use>`), 39 ikon —
     dipakai di header, kartu kategori, judul seksi, baris kontak, footer, dan langkah.

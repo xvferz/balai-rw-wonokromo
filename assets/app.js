@@ -314,15 +314,28 @@ function setNav(view){
     if(on) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current");
   });
 }
+/* Logo mark mengikuti warna kategori halaman yang sedang dibuka */
+function setMark(g){
+  const head = $("head");
+  const hue = g && HUE[g];
+  if(hue){
+    head.style.setProperty("--mark-a", `hsl(${hue[0]} ${hue[1]}% 46%)`);
+    head.style.setProperty("--mark-b", `hsl(${hue[0]} ${hue[1]}% 26%)`);
+  } else {
+    head.style.removeProperty("--mark-a");
+    head.style.removeProperty("--mark-b");
+  }
+}
 function route(){
   const id = (location.hash||"").slice(1) || "beranda";
+  const svc = SVCMAP[id];
   let view = "beranda";
   if(id==="ssw"||id==="oss") view = id;
-  else if(SVCMAP[id]){ view = "svc"; renderSvc(SVCMAP[id]); }
+  else if(svc){ view = "svc"; renderSvc(svc); }
   document.querySelectorAll("[data-view]").forEach(v => v.hidden = v.dataset.view !== view);
   setNav(view);
+  setMark(svc ? svc.g : null);
   window.scrollTo(0,0);
-  const svc = SVCMAP[id];
   document.title = svc ? (svc.t + " – " + BRW)
     : view === "ssw" ? ("Panduan SSW Alfa – " + BRW)
     : view === "oss" ? ("OSS RBA: Akun & NIB Usaha Mikro – " + BRW)
