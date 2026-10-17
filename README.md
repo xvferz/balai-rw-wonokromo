@@ -23,8 +23,11 @@ reference/            → snapshot HTML asli + catatan + hasil ekstraksi
 ## Menjalankan secara lokal
 
 ```bash
-# dari folder ini (harus lewat http, bukan file://, karena hash router + fetch font)
-npx serve .          # atau python -m http.server 8000
+# server statis tanpa dependensi (bisa diakses HP via Wi-Fi yang sama)
+node serve.js          # -> http://localhost:8080
+
+# atau lewat http, bukan file://, karena hash router
+npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
 ```
 
 ## Perbedaan vs situs asli
