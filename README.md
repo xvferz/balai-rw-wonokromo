@@ -46,6 +46,10 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
   rapi di safe-area, hover "nyangkut" dinetralkan di perangkat sentuh.
 - **Pencarian lebih pintar**: token + prefiks + skor (judul lebih berbobot daripada tag),
   masih mode-AND sehingga hasil tetap relevan.
+- **Desain v2 "Clean & Consistent"**: design token (skala spasi/radius/bayangan/tipografi),
+  tanpa emoji & ikon (teks murni + panah tipografis), 9 warna kategori disatukan pada satu
+  ramp HSL (hue saja), satu komponen tombol/chip/kartu/pencarian, scrollspy instan pada tab
+  SSW & kategori beranda, strip kredit dipindah ke footer.
 - **SEO/halaman**: tiap route mengubah `document.title` + meta description
   (riwayat back-button lebih informatif); canonical + og:image + robots.txt.
 - Semua konten, data layanan, dan fitur interaktif sama seperti aslinya.
