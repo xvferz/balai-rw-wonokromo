@@ -106,6 +106,7 @@ function renderHome(){
     if(ss.length) html += `<div class="res-h"><h3>${ss.length} izin di SSW Alfa</h3></div><div class="results">${ss.slice(0,30).map(it=>sswItemHTML(it,true,true)).join("")}</div>`;
     if(!html) html = `<div class="empty" style="margin-top:14px">Belum ketemu untuk "<b>${esc(raw)}</b>". Coba kata lain, atau tanyakan langsung ke petugas di Balai RW.</div>`;
     out.innerHTML = html;
+    $("kategori").hidden = true;
     return;
   }
   let html = rwcardHTML();
@@ -116,6 +117,7 @@ function renderHome(){
       <div class="grid">${list.map(tileHTML).join("")}</div></section>`;
   });
   out.innerHTML = html;
+  $("kategori").hidden = false;
 }
 
 /* Grid kategori + kategori footer */
@@ -128,9 +130,20 @@ $("kgrid").innerHTML = GROUPS.map(([g,l]) => {
 }).join("");
 $("footCats").innerHTML = GROUPS.map(([g,l]) => `<li><button type="button" data-g="${g}">${esc(tidy(l))}</button></li>`).join("");
 
-/* Chip cari cepat */
+/* Chip cari cepat (disingkat jadi 8 + tombol buka, supaya banner/strip tidak padat) */
 const HQUICK = [["Cek desil/gamis","cek gamis"],["SKTM","sktm"],["Akun KNG","kng"],["KTP digital","ikd"],["Nikah","nikah"],["Sanggah desil","desil"],["KTP hilang","ktp"],["Akta","akta"],["Ahli waris","waris"],["Beasiswa","beasiswa"],["BPJS gratis","bpjs"],["Bedah rumah","rutilahu"],["PKH / BPNT","pkh"],["NIB","nib"],["IMB / PBG","imb"],["Cari kerja","kerja"]];
-$("hquick").innerHTML = HQUICK.map(([l,t])=>`<button type="button" data-t="${t}">${esc(tidy(l))}</button>`).join("");
+const VISIBLE_Q = 8;
+$("hquick").innerHTML = HQUICK.map(([l,t])=>`<button type="button" data-t="${t}">${esc(tidy(l))}</button>`).join("")
+  + `<button class="qmore" type="button" aria-expanded="false">+${HQUICK.length - VISIBLE_Q} lagi</button>`;
+$("hquick").classList.add("collapsed");
+{
+  const box = $("hquick"), more = box.querySelector(".qmore");
+  more.onclick = () => {
+    const collapsed = box.classList.toggle("collapsed");
+    more.setAttribute("aria-expanded", String(!collapsed));
+    more.textContent = collapsed ? "+" + (HQUICK.length - VISIBLE_Q) + " lagi" : "Lebih sedikit";
+  };
+}
 $("hstats").innerHTML = `<div><b>${SVC.length}</b><span>panduan layanan</span></div><div><b>${ALL.length}</b><span>izin di SSW Alfa</span></div><div><b>${GROUPS.length}</b><span>kategori</span></div>`;
 
 /* ============ Pencarian global (hero + header) ============ */
@@ -138,7 +151,7 @@ function setTerm(v){ $("hq").value = v; $("gq").value = v; renderHome(); }
 $("hq").addEventListener("input", e => { $("gq").value = e.target.value; renderHome(); });
 $("gq").addEventListener("input", e => { $("hq").value = e.target.value; renderHome(); });
 $("hclr").onclick = () => { setTerm(""); $("hq").focus(); };
-$("hquick").querySelectorAll("button").forEach(b => b.onclick = () => { setTerm(b.dataset.t); scrollToEl($("hout")); });
+$("hquick").querySelectorAll("button").forEach(b => { if(b.classList.contains("qmore")) return; b.onclick = () => { setTerm(b.dataset.t); scrollToEl($("hout")); }; });
 $("hsearchHero").addEventListener("submit", e => e.preventDefault());
 $("hsearch").addEventListener("submit", e => { e.preventDefault(); $("gq").blur(); });
 
