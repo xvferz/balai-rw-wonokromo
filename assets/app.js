@@ -351,16 +351,16 @@ function setPageHue(g){
     root.style.removeProperty("--page-s");
   }
 }
-/* Logo mark mengikuti warna kategori halaman yang sedang dibuka */
+/* Logo mark (header + footer) mengikuti warna kategori halaman yang dibuka */
 function setMark(g){
-  const head = $("head");
+  const root = document.documentElement;
   const hue = g && HUE[g];
   if(hue){
-    head.style.setProperty("--mark-a", `hsl(${hue[0]} ${hue[1]}% 46%)`);
-    head.style.setProperty("--mark-b", `hsl(${hue[0]} ${hue[1]}% 26%)`);
+    root.style.setProperty("--mark-a", `hsl(${hue[0]} ${hue[1]}% 46%)`);
+    root.style.setProperty("--mark-b", `hsl(${hue[0]} ${hue[1]}% 26%)`);
   } else {
-    head.style.removeProperty("--mark-a");
-    head.style.removeProperty("--mark-b");
+    root.style.removeProperty("--mark-a");
+    root.style.removeProperty("--mark-b");
   }
 }
 function route(){
