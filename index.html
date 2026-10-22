@@ -93,7 +93,7 @@
 
     <nav class="mainnav" aria-label="Navigasi utama">
       <a href="#beranda" data-nav="beranda">Beranda</a>
-      <button type="button" data-nav="layanan" data-go="kategori">Layanan</button>
+      <a href="#layanan" data-nav="layanan">Layanan</a>
       <button type="button" data-nav="bantuan" data-go="bantuan">Bantuan</button>
     </nav>
 
@@ -110,7 +110,7 @@
     <div class="drawer-in">
       <p class="drawer-t">Menu</p>
       <a href="#beranda" data-nav="beranda">Beranda</a>
-      <button type="button" data-nav="layanan" data-go="kategori">Semua layanan</button>
+      <a href="#layanan" data-nav="layanan">Semua layanan</a>
       <button type="button" data-go="faq">Pertanyaan umum</button>
       <button type="button" data-nav="bantuan" data-go="bantuan">Kontak bantuan</button>
       <div class="drawer-foot">
@@ -124,21 +124,22 @@
 <!-- ================= BERANDA ================= -->
 <div data-view="beranda">
   <section class="hero">
-    <svg class="hero-art" aria-hidden="true"><use href="#i-building"/></svg>
-    <div class="wrap hero-in">
-      <div class="hero-txt">
-        <span class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg> Kecamatan Wonokromo · Kota Surabaya</span>
-        <h1>Mau urus apa hari ini?</h1>
-        <p class="lead">Panduan KTP, KK, akta, surat keterangan, izin usaha, bansos, pendidikan, kesehatan, dan pekerjaan — diringkas dari dokumen resmi Pemerintah Kota Surabaya.</p>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="#ssw">Panduan SSW Alfa <svg class="ic" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
-          <a class="btn btn-soft" href="#oss">Buat NIB usaha mikro</a>
+    <div class="wrap">
+      <div class="hero-grid">
+        <div class="hero-txt">
+          <h1>Mau urus apa hari ini?</h1>
+          <p class="lead">Panduan layanan warga Kecamatan Wonokromo, Kota Surabaya — KTP, KK, akta, surat keterangan, izin usaha, bansos, pendidikan, kesehatan, dan pekerjaan, diringkas dari dokumen resmi Pemerintah Kota Surabaya.</p>
+          <div class="hero-cta">
+            <a class="btn btn-primary" href="#ssw">Panduan SSW Alfa <svg class="ic" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+            <a class="btn btn-soft" href="#oss">Buat NIB usaha mikro</a>
+          </div>
         </div>
+        <img class="hero-photo" src="assets/img/hero-dtc.jpg" width="1440" height="960" alt="Pasar DTC dan banner bertuliskan Wonokromo, Kecamatan Wonokromo, Surabaya" fetchpriority="high" decoding="async">
       </div>
       <form class="search hero-search" role="search" id="hsearchHero">
         <label class="sr" for="hq">Cari layanan</label>
         <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
-        <input id="hq" type="search" placeholder="Contoh: beasiswa, jamban, BPJS, izin reklame" autocomplete="off">
+        <input id="hq" type="search" placeholder="Cari: beasiswa, jamban, BPJS" autocomplete="off">
         <button class="clr" id="hclr" type="button" aria-label="Hapus pencarian" hidden>×</button>
       </form>
     </div>
@@ -154,12 +155,29 @@
     <section class="ksec" id="kategori">
       <div class="sec-h">
         <span class="sec-ic"><svg class="ic" aria-hidden="true"><use href="#i-list"/></svg></span>
-        <div><h2>Sembilan kategori layanan</h2><p>Pilih kategori, lalu buka panduan dan centang persiapannya.</p></div>
+        <div><h2>Sembilan kategori layanan</h2><p>Pilih kategori untuk membuka halamannya: daftar panduan lengkap dengan syarat dan biayanya.</p></div>
       </div>
       <div class="kgrid" id="kgrid"></div>
     </section>
 
     <div id="hout"></div>
+
+    <section class="then" id="wonokromo">
+      <div class="sec-h">
+        <span class="sec-ic"><svg class="ic" aria-hidden="true"><use href="#i-pin"/></svg></span>
+        <div><h2>Wonokromo, dulu &amp; kini</h2><p>Foto arsip pasar malam Surabaya (1905–1906) dan suasana jalan sekitar Wonokromo hari ini.</p></div>
+      </div>
+      <div class="thengrid">
+        <figure class="thenfig">
+          <img src="assets/img/wonokromo-dulu.jpg" width="1280" height="905" alt="Penenun songket di pasar malam Surabaya, foto Ohannes Kurkdjian, 1905–1906" loading="lazy" decoding="async">
+          <figcaption><b>Dulu.</b> Penenun songket di pasar malam Surabaya, 1905–1906 — koleksi KITLV, domain publik</figcaption>
+        </figure>
+        <figure class="thenfig">
+          <img src="assets/img/wonokromo-kini.jpg" width="1280" height="852" alt="Pedagang dan pengendara motor di Jalan Kranggan dekat Wonokromo, Surabaya, 2025" loading="lazy" decoding="async">
+          <figcaption><b>Kini.</b> Jalan Kranggan dekat Wonokromo, 2025 — Bahnfrend, CC BY-SA 4.0</figcaption>
+        </figure>
+      </div>
+    </section>
 
     <section class="faqsec" id="faq">
       <div class="sec-h">
@@ -178,19 +196,39 @@
   </main>
 </div>
 
+<!-- ================= LAYANAN: katalog semua kategori ================= -->
+<div data-view="layanan" hidden>
+  <section class="hero hero-l">
+    <div class="wrap">
+      <h1>Semua layanan</h1>
+      <p class="lead">Sembilan kategori layanan warga Kecamatan Wonokromo — dari KTP sampai izin usaha. Pilih kategori untuk melihat panduannya satu per satu.</p>
+      <form class="search hero-search" role="search" id="lsearch">
+        <label class="sr" for="lq">Cari layanan</label>
+        <svg class="ic" aria-hidden="true"><use href="#i-search"/></svg>
+        <input id="lq" type="search" placeholder="Cari layanan: KTP, bansos, jamban" autocomplete="off">
+        <button class="clr" id="lclr" type="button" aria-label="Hapus pencarian" hidden>×</button>
+      </form>
+    </div>
+  </section>
+  <main class="wrap" id="layananBody"></main>
+</div>
+
 <!-- ================= SSW ALFA ================= -->
 <div data-view="ssw" hidden>
   <section class="hero">
-    <svg class="hero-art" aria-hidden="true"><use href="#i-route"/></svg>
     <div class="wrap">
-      <span class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-building"/></svg> Perizinan Online Kota Surabaya</span>
-      <h1>SSW Alfa</h1>
-      <p class="lead">SSW Alfa (Surabaya Single Window Alfa) adalah aplikasi perizinan online Pemerintah Kota Surabaya. Daftar, unggah berkas, pantau status, sampai cetak izin bisa dari rumah tanpa bolak-balik ke kantor.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="https://sswalfa.surabaya.go.id" target="_blank" rel="noopener">Buka SSW Alfa <svg class="ic" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
-        <button class="btn btn-soft" type="button" data-jump="ssw-layanan"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg> Cari layanan</button>
+      <div class="hero-grid">
+        <div class="hero-txt">
+          <h1>SSW Alfa</h1>
+          <p class="lead">SSW Alfa (Surabaya Single Window Alfa) adalah aplikasi perizinan online Pemerintah Kota Surabaya. Daftar, unggah berkas, pantau status, sampai cetak izin bisa dari rumah tanpa bolak-balik ke kantor.</p>
+          <div class="cta">
+            <a class="btn btn-primary" href="https://sswalfa.surabaya.go.id" target="_blank" rel="noopener">Buka SSW Alfa <svg class="ic" aria-hidden="true"><use href="#i-arrow-up-right"/></svg></a>
+            <button class="btn btn-soft" type="button" data-jump="ssw-layanan"><svg class="ic" aria-hidden="true"><use href="#i-search"/></svg> Cari layanan</button>
+          </div>
+          <p class="src"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg> Diringkas dari Buku Saku SSW Alfa, Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu Kota Surabaya.</p>
+        </div>
+        <img class="hero-photo" src="assets/img/balai-kota.jpg" width="1280" height="673" alt="Balai Kota Surabaya sore hari, kantor Pemerintah Kota Surabaya" loading="lazy" decoding="async">
       </div>
-      <p class="src"><svg class="ic" aria-hidden="true"><use href="#i-book"/></svg> Diringkas dari Buku Saku SSW Alfa, Dinas Penanaman Modal dan Pelayanan Terpadu Satu Pintu Kota Surabaya.</p>
     </div>
   </section>
 
@@ -316,9 +354,7 @@
 <!-- ================= OSS RBA ================= -->
 <div data-view="oss" hidden>
   <section class="hero">
-    <svg class="hero-art" aria-hidden="true"><use href="#i-briefcase"/></svg>
     <div class="wrap">
-      <span class="eyebrow"><svg class="ic" aria-hidden="true"><use href="#i-briefcase"/></svg> Izin Usaha Nasional · Untuk UMK</span>
       <h1>OSS RBA: Akun &amp; NIB Usaha Mikro</h1>
       <p class="lead">Buat akun OSS, lalu terbitkan NIB (Nomor Induk Berusaha), identitas resmi pelaku usaha untuk memulai atau menjalankan usaha di Indonesia. Mudah, cepat, dan gratis.</p>
       <div class="chips"><span>Gratis</span><span>Bisa didampingi di Balai RW</span></div>
@@ -439,7 +475,7 @@
         <li><a href="#beranda">Beranda</a></li>
         <li><a href="#ssw">Panduan SSW Alfa</a></li>
         <li><a href="#oss">OSS RBA &amp; NIB</a></li>
-        <li><button type="button" data-go="kategori">Semua layanan</button></li>
+        <li><a href="#layanan">Semua layanan</a></li>
         <li><button type="button" data-go="faq">Pertanyaan umum</button></li>
       </ul>
     </nav>
@@ -468,6 +504,7 @@
     </div>
     <div class="wrap foot-note">
       <p>Sumber: Buku Saku SSW Alfa (DPMPTSP Kota Surabaya), Panduan Pendaftaran Hak Akses OSS RBA, materi Pelayanan Balai RW Pemerintah Kota Surabaya, dan Syarat Pelayanan Publik Kecamatan Wonokromo. Syarat &amp; ketentuan terbaru tetap mengikuti instansi masing-masing.</p>
+      <p>Foto: DTC Wonokromo (Pemerintah Kota Surabaya, domain publik), Stasiun Wonokromo (Rizal Febri Ardiansyah, CC BY-SA 4.0), pasar malam Surabaya 1905–1906 (Ohannes Kurkdjian — KITLV, domain publik), Jalan Kranggan (Bahnfrend, CC BY-SA 4.0), dan Balai Kota Surabaya (Yamin Nathaniel, CC BY-SA 2.0), semuanya via Wikimedia Commons.</p>
     </div>
   </div>
 </footer>

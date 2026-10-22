@@ -1,6 +1,7 @@
 /* ============================================================
-   Pelayanan Balai RW Wonokromo — app v3
-   Ikon SVG, grid kategori, header + drawer, mode gelap.
+   Pelayanan Balai RW Wonokromo — app v9
+   Ikon SVG, halaman Layanan (katalog kategori → per kategori),
+   grid beranda, header + drawer, mode gelap.
    ============================================================ */
 const $ = id => document.getElementById(id);
 const $$ = sel => [...document.querySelectorAll(sel)];
@@ -82,10 +83,10 @@ function ranked(words, idx){
 /* ============ Beranda ============ */
 const SVCIDX = SVC.map(s => ({s, tt: toks(s.t), at: toks([s.t, s.d, s.tags || "", gname(s.g)].join(" "))}));
 function tileHTML(s){
-  return `<a class="tile" data-cat style="${cvars(s.g)}" href="#${s.id}"><b>${esc(s.t)}</b><small>${esc(s.d)}</small><span class="ch">${esc(s.ch)}</span>${IC("arrow-up-right","go")}</a>`;
+  return `<a class="tile" data-cat style="${cvars(s.g)}" href="#${s.id}"><b>${esc(s.t)}</b><small>${esc(s.d)}</small><span class="ch">${esc(s.ch)}</span><span class="go" aria-hidden="true">↗</span></a>`;
 }
 function rwcardHTML(){
-  return `<div class="rwcard"><span class="rw-ic">${IC("building")}</span>
+  return `<div class="rwcard"><img class="rw-photo" src="assets/img/stasiun-wonokromo.jpg" width="1280" height="960" alt="Stasiun Wonokromo, landmark Kecamatan Wonokromo, Surabaya" loading="lazy" decoding="async">
     <div class="rwtop"><b>Bingung mulai dari mana? Datang ke Balai RW.</b><span>Petugas ASN di sana siap membantu menjawab pertanyaan Anda.</span></div>
     <div class="rwfacts">
       <div><small>Lokasi</small><b>Seluruh Kecamatan Wonokromo</b></div>
@@ -93,50 +94,85 @@ function rwcardHTML(){
       <div><small>Biaya</small><b>Gratis</b></div>
     </div></div>`;
 }
+/* Hasil pencarian bersama (dipakai beranda + halaman Layanan).
+   Mengembalikan HTML: panduan (tile) + izin di SSW (item). */
+function searchHTML(raw, clearLabel){
+  const words = norm(raw).split(/\s+/).filter(Boolean);
+  const hs = ranked(words, SVCIDX).map(x => x.s);
+  const ss = ranked(words, ALLIDX).map(x => x.it);
+  let html = "";
+  if(hs.length) html += `<div class="res-h"><h3>${hs.length} panduan layanan</h3>${clearLabel?`<button class="back" type="button" data-clear>${IC("x")} ${clearLabel}</button>`:""}</div><div class="grid">${hs.map(tileHTML).join("")}</div>`;
+  if(ss.length) html += `<div class="res-h"><h3>${ss.length} izin di SSW Alfa</h3></div><div class="results">${ss.slice(0,30).map(it=>sswItemHTML(it,true,true)).join("")}</div>`;
+  if(!html) html = `<div class="empty" style="margin-top:14px">Belum ketemu untuk "<b>${esc(raw)}</b>". Coba kata lain, atau tanyakan langsung ke petugas di Balai RW.</div>`;
+  return html;
+}
+/* Beranda: hanya kartu Balai RW. Daftar 9 grup panjang dipindah ke halaman Layanan (v9). */
 function renderHome(){
-  const raw = $("hq").value.trim(), term = norm(raw);
-  $("hclr").hidden = !term;
+  const raw = $("hq").value.trim();
+  $("hclr").hidden = !raw;
   const out = $("hout");
-  if(term){
-    const words = term.split(/\s+/).filter(Boolean);
-    const hs = ranked(words, SVCIDX).map(x => x.s);
-    const ss = ranked(words, ALLIDX).map(x => x.it);
-    let html = "";
-    if(hs.length) html += `<div class="res-h"><h3>${hs.length} panduan layanan</h3><button class="back" type="button" data-clear>${IC("x")} Hapus pencarian</button></div><div class="grid">${hs.map(tileHTML).join("")}</div>`;
-    if(ss.length) html += `<div class="res-h"><h3>${ss.length} izin di SSW Alfa</h3></div><div class="results">${ss.slice(0,30).map(it=>sswItemHTML(it,true,true)).join("")}</div>`;
-    if(!html) html = `<div class="empty" style="margin-top:14px">Belum ketemu untuk "<b>${esc(raw)}</b>". Coba kata lain, atau tanyakan langsung ke petugas di Balai RW.</div>`;
-    out.innerHTML = html;
+  if(raw){
+    out.innerHTML = searchHTML(raw, "Hapus pencarian");
     $("kategori").hidden = true;
     return;
   }
-  let html = rwcardHTML();
-  GROUPS.forEach(([g,label]) => {
-    const list = SVC.filter(s=>s.g===g);
-    html += `<section id="grp-${g}" data-cat style="${cvars(g)}">
-      <div class="sec-h"><span class="sec-ic">${IC(gicon(g))}</span><div><h2>${esc(tidy(label))}</h2><p>${list.length} panduan layanan</p></div></div>
-      <div class="grid">${list.map(tileHTML).join("")}</div></section>`;
-  });
-  out.innerHTML = html;
+  out.innerHTML = rwcardHTML();
   $("kategori").hidden = false;
+}
+
+/* ============ Halaman Layanan (katalog semua kategori) ============ */
+let layCat = null, curView = "beranda";
+function layIndexHTML(){
+  const cards = GROUPS.map(([g,l]) => {
+    const n = SVC.filter(s=>s.g===g).length;
+    return `<a class="kcard" data-cat style="${cvars(g)}" href="#layanan/${g}">
+      <span class="kcard-b"><b>${esc(tidy(l))}</b><small>${n} panduan</small></span>
+    </a>`;
+  }).join("");
+  const sswEntry = `<section class="lay-ssw"><span class="row-ic">${IC("search")}</span><div><b>Mencari jenis izin tertentu?</b><span>Telusuri ${ALL.length} izin non-berusaha di pencari SSW Alfa, lengkap dengan status retribusinya.</span></div><a class="btn btn-soft" href="#ssw">Buka pencari izin ${IC("arrow-right")}</a></section>`;
+  return `<div class="kgrid">${cards}</div>${sswEntry}`;
+}
+function layCatHTML(g){
+  const list = SVC.filter(s=>s.g===g);
+  return `<a class="back lay-back" href="#layanan">${IC("arrow-left")} Semua kategori</a>
+  <section data-cat style="${cvars(g)}">
+    <div class="sec-h"><span class="sec-ic">${IC(gicon(g))}</span><div><h2>${esc(gname(g))}</h2><p>${list.length} panduan layanan</p></div></div>
+    <div class="grid">${list.map(tileHTML).join("")}</div>
+  </section>`;
+}
+function renderLayanan(){
+  const body = $("layananBody");
+  if(!body) return;
+  const raw = $("lq").value.trim();
+  $("lclr").hidden = !raw;
+  if(raw){
+    body.innerHTML = searchHTML(raw, "Tampilkan semua kategori");
+    return;
+  }
+  if(layCat && HUE[layCat]){ body.innerHTML = layCatHTML(layCat); return; }
+  body.innerHTML = layIndexHTML();
 }
 
 /* Grid kategori + kategori footer */
 $("kgrid").innerHTML = GROUPS.map(([g,l]) => {
   const n = SVC.filter(s=>s.g===g).length;
-  return `<button class="kcard" type="button" data-cat data-g="${g}" style="${cvars(g)}">
-    <span class="kcard-ic">${IC(gicon(g))}</span>
+  return `<a class="kcard" data-cat style="${cvars(g)}" href="#layanan/${g}">
     <span class="kcard-b"><b>${esc(tidy(l))}</b><small>${n} panduan</small></span>
-    ${IC("arrow-right","kcard-go")}</button>`;
+  </a>`;
 }).join("");
 $("footCats").innerHTML = GROUPS.map(([g,l]) => `<li><button type="button" data-g="${g}">${esc(tidy(l))}</button></li>`).join("");
 
-$("hstats").innerHTML = `<div><b>${SVC.length}</b><span>panduan layanan</span></div><div><b>${ALL.length}</b><span>izin di SSW Alfa</span></div><div><b>${GROUPS.length}</b><span>kategori</span></div>`;
+$("hstats").innerHTML = `<div><b>${SVC.length}</b><span>panduan</span></div><div><b>${ALL.length}</b><span>izin SSW Alfa</span></div><div><b>${GROUPS.length}</b><span>kategori</span></div>`;
 
 /* ============ Pencarian global (di banner) ============ */
 function setTerm(v){ $("hq").value = v; renderHome(); }
 $("hq").addEventListener("input", () => renderHome());
 $("hclr").onclick = () => { setTerm(""); $("hq").focus(); };
 $("hsearchHero").addEventListener("submit", e => e.preventDefault());
+/* Pencarian di halaman Layanan (id sendiri, tidak bentrok dengan beranda) */
+$("lq").addEventListener("input", () => renderLayanan());
+$("lclr").onclick = () => { $("lq").value = ""; renderLayanan(); $("lq").focus(); };
+$("lsearch").addEventListener("submit", e => e.preventDefault());
 
 /* ============ SSW finder ============ */
 const out = $("out"), q = $("q"), clr = $("clr");
@@ -220,14 +256,10 @@ function renderSvc(s){
   const hero = $("svcHead").parentElement;
   hero.setAttribute("data-cat", "");
   hero.setAttribute("style", cvars(s.g));
-  const oldArt = hero.querySelector(".hero-art");
-  if(oldArt) oldArt.remove();
-  hero.insertAdjacentHTML("afterbegin", `<svg class="hero-art" aria-hidden="true"><use href="#i-${gicon(s.g)}"/></svg>`);
   $("svcBody").setAttribute("data-cat", "");
   $("svcBody").setAttribute("style", cvars(s.g));
   const crumb = (h) => `<nav class="crumbs"><a href="#beranda">Beranda</a>${IC("chevron-right")}<button type="button" data-g="${s.g}">${esc(gname(s.g))}</button>${IC("chevron-right")}<span>${esc(s.t)}</span></nav>`;
-  $("svcHead").innerHTML = `<div class="eyebrow">${IC(gicon(s.g))} ${esc(gname(s.g))}</div>
-    <h1>${esc(s.t)}</h1><p class="lead">${esc(s.d)}</p>
+  $("svcHead").innerHTML = `<h1>${esc(s.t)}</h1><p class="lead">${esc(s.d)}</p>
     <div class="chips"><span>${esc(s.ch)}</span>${s.steps?`<span>${s.steps.length} langkah</span>`:""}</div>${crumb(s)}`;
   let h = "", side = "";
   const blk = (cls, ic, title, body) => `<div class="block ${cls}"><h3><span class="b-ic">${IC(ic)}</span>${esc(title)}</h3>${body}</div>`;
@@ -282,12 +314,30 @@ document.addEventListener("click", e => {
     }
     return;
   }
+  const lay = e.target.closest('[data-nav="layanan"]');
+  if(lay){
+    closeDrawer();
+    /* Sudah di katalog (bukan di dalam kategori)? scroll ke atas + kosongkan pencarian */
+    if((location.hash || "").slice(1) === "layanan"){
+      e.preventDefault();
+      $("lq").value = "";
+      renderLayanan();
+      window.scrollTo({ top: 0, behavior: smooth() });
+      markNav("layanan");
+    }
+    return;
+  }
   const grp = e.target.closest("[data-g]");
   if(grp){ closeDrawer(); goGroup(grp.dataset.g); return; }
   const go = e.target.closest("[data-go]");
   if(go){ closeDrawer(); goSection(go.dataset.go); return; }
   const clr2 = e.target.closest("[data-clear]");
-  if(clr2){ setTerm(""); scrollToEl($("kategori")); return; }
+  if(clr2){
+    /* Tombol hapus pencarian: sadar konteks halamannya */
+    if(curView === "layanan"){ $("lq").value = ""; renderLayanan(); scrollToEl($("layananBody")); }
+    else { setTerm(""); scrollToEl($("kategori")); }
+    return;
+  }
   const cp = e.target.closest(".share .cp");
   if(cp){
     const v = cp.dataset.link;
@@ -303,8 +353,9 @@ function ensureBeranda(cb){
   setTimeout(cb, 90);
 }
 function goGroup(g){
-  if($("hq").value) setTerm("");
-  ensureBeranda(() => scrollToEl($("grp-" + g)));
+  /* Sejak v9: kategori = halaman sendiri di #layanan/<g>, bukan seksi beranda */
+  if(location.hash.slice(1) === "layanan/" + g) return;
+  location.hash = "layanan/" + g;
 }
 function goSection(id){
   ensureBeranda(() => scrollToEl($(id)));
@@ -313,10 +364,10 @@ function goSection(id){
 let navTick = false;
 function navSpy(){
   navTick = false;
-  if(((location.hash || "").slice(1) || "beranda") !== "beranda") return;
+  /* Hanya di beranda; halaman lain highlight nav mengikuti view (lihat route) */
+  if(curView !== "beranda") return;
   const help = $("bantuan").getBoundingClientRect();
   if(help.top < window.innerHeight * 0.6) markNav("bantuan");
-  else if(window.scrollY > 240) markNav("layanan");
   else markNav("beranda");
 }
 window.addEventListener("scroll", () => {
@@ -327,6 +378,7 @@ window.addEventListener("scroll", () => {
 const BRW = "Pelayanan Balai RW Wonokromo";
 const DEFAULT_DESC = (document.querySelector('meta[name="description"]')||{}).content || "";
 const VIEW_DESC = {
+  layanan: "Daftar semua panduan layanan warga Kecamatan Wonokromo, Surabaya: KTP, KK, akta, surat keterangan, izin usaha, bansos, pendidikan, kesehatan, dan pekerjaan.",
   ssw: "Panduan SSW Alfa Surabaya: buat akun, ajukan izin online, pantau status, revisi berkas, dan telusuri 17 kategori layanan.",
   oss: "Cara buat akun OSS dan NIB usaha mikro gratis di oss.go.id, bisa didampingi petugas di Balai RW Kecamatan Wonokromo."
 };
@@ -364,22 +416,41 @@ function setMark(g){
   }
 }
 function route(){
-  const id = (location.hash||"").slice(1) || "beranda";
+  const raw = (location.hash||"").slice(1) || "beranda";
+  /* Alias anchor lama (sebelum v9): #kategori → #layanan, #grp-<g> → #layanan/<g> */
+  if(raw === "kategori"){ location.replace("#layanan"); return; }
+  if(/^grp-/.test(raw)){
+    const g = raw.slice(4);
+    if(HUE[g]){ location.replace("#layanan/" + g); return; }
+  }
+  const seg = raw.split("/");
+  const id = seg[0];
   const svc = SVCMAP[id];
   let view = "beranda";
-  if(id==="ssw"||id==="oss") view = id;
+  layCat = null;
+  if(id === "ssw" || id === "oss") view = id;
+  else if(id === "layanan"){ view = "layanan"; layCat = (seg[1] && HUE[seg[1]]) ? seg[1] : null; }
   else if(svc){ view = "svc"; renderSvc(svc); }
+  curView = view;
   document.querySelectorAll("[data-view]").forEach(v => v.hidden = v.dataset.view !== view);
   setNav(view);
-  setMark(svc ? svc.g : null);
-  setPageHue(svc ? svc.g : null);
+  const g = svc ? svc.g : layCat;
+  setMark(g);
+  setPageHue(g);
   window.scrollTo(0,0);
   document.title = svc ? (svc.t + " – " + BRW)
+    : view === "layanan" ? (layCat ? (gname(layCat) + " – Semua Layanan – " + BRW) : ("Semua Layanan – " + BRW))
     : view === "ssw" ? ("Panduan SSW Alfa – " + BRW)
     : view === "oss" ? ("OSS RBA: Akun & NIB Usaha Mikro – " + BRW)
     : BRW;
   const md = document.querySelector('meta[name="description"]');
-  if(md) md.setAttribute("content", svc ? svc.d : (VIEW_DESC[view] || DEFAULT_DESC));
+  if(md){
+    let desc = svc ? svc.d : (VIEW_DESC[view] || DEFAULT_DESC);
+    if(view === "layanan" && layCat) desc = `Panduan ${gname(layCat)} di Kecamatan Wonokromo, Surabaya: ${SVC.filter(s=>s.g===layCat).length} panduan dengan syarat, biaya, dan caranya.`;
+    md.setAttribute("content", desc);
+  }
+  /* Masuk katalog: kosongkan pencarian lama supaya selalu mulai dari daftar kategori */
+  if(view === "layanan"){ $("lq").value = ""; renderLayanan(); }
 }
 window.addEventListener("hashchange", route);
 
@@ -388,7 +459,7 @@ window.addEventListener("hashchange", route);
 bindCopy(document);
 $("sswShare").innerHTML = shareHTML("ssw","Panduan SSW Alfa");
 $("ossShare").innerHTML = shareHTML("oss","Cara buat akun OSS & NIB Usaha Mikro");
-renderHome(); renderSSW(); update(); route();
+renderHome(); renderSSW(); renderLayanan(); update(); route();
 /* Scrollspy tab SSW (instan, tanpa animasi) */
 (() => {
   const btns = $$("nav.tabs [data-jump]");

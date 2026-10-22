@@ -1,6 +1,6 @@
 /* Service worker: offline-first app shell for Pelayanan Balai RW Wonokromo.
  * Strategy: stale-while-revalidate for same-origin GETs. */
-const VERSION = 'balai-rw-v4';
+const VERSION = 'balai-rw-v9';
 const ASSETS = [
   './',
   './index.html',
@@ -10,6 +10,11 @@ const ASSETS = [
   './manifest.webmanifest',
   './assets/icons/icon-192.png',
   './assets/icons/icon-512.png',
+  './assets/img/hero-dtc.jpg',
+  './assets/img/stasiun-wonokromo.jpg',
+  './assets/img/wonokromo-dulu.jpg',
+  './assets/img/wonokromo-kini.jpg',
+  './assets/img/balai-kota.jpg',
 ];
 
 self.addEventListener('install', (e) => {
