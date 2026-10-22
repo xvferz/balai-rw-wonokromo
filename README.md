@@ -11,15 +11,19 @@ Referensi snapshot dari situs asli disimpan di `reference/`.
 ## Struktur
 
 ```
-index.html            → seluruh markup (4 view: beranda, ssw, oss, svc) + sprite ikon SVG
+index.html            → seluruh markup (5 view: beranda, layanan, ssw, oss, svc) + sprite ikon SVG
 assets/style.css      → design system v3+ (token, light + dark, komponen, responsif)
 assets/data.js        → data murni: CATS (17 kategori, ~130 layanan SSW),
                         GROUPS (9 kelompok portal), SVC (~40 panduan layanan)
 assets/app.js         → logika: render + ikon, pencarian berbobot skor, checklist localStorage,
-                        router hash + judul/deskripsi per halaman, tema per kategori, drawer, bagikan
-sw.js                 → service worker (offline-first, stale-while-revalidate)
+                        router hash (beranda / Layanan katalog / Layanan/<kategori> / svc / ssw / oss,
+                        + redirect alias anchor lama) + judul & meta deskripsi per halaman,
+                        tema per kategori, drawer, bagikan
+sw.js                 → service worker (offline-first, stale-while-revalidate; v9 mem-cache foto)
 manifest.webmanifest  → PWA manifest (dapat di-install ke layar utama HP)
 assets/icons/         → ikon PWA (dibuat oleh tools/make-icons.js)
+assets/img/           → foto Wonokromo (5 berkas; kredit di footer + assets/credits.json)
+assets/credits.json   → catatan per foto: pembuat, lisensi, halaman sumber
 serve.js              → server statis kecil untuk uji lokal / preview via Wi-Fi
 reference/            → snapshot HTML asli + catatan + hasil ekstraksi + skrip uji
 netlify.toml          → config deploy Netlify (publish ".", cache headers)
@@ -45,6 +49,26 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
 
 - Dipecah menjadi `index.html` + `assets/{style.css,data.js,app.js}` (asli: satu file HTML raksasa).
 - Menghapus snippet kolom komentar/HUD khusus Netlify.
+- **Halaman Layanan + permukaan rata (v9)**:
+  - **"Layanan" jadi halaman sendiri** (`#layanan`): katalog 9 kategori sebagai kartu teks
+    (tanpa ikon di atas kartu — warna kategori muncul saat hover) plus tile pintu masuk ke
+    pencari izin SSW; setiap kategori punya halaman sendiri di `#layanan/<kategori>`
+    (tombol "Semua kategori" untuk kembali). Anchor lama dialihkan otomatis:
+    `#kategori` → `#layanan`, `#grp-<x>` → `#layanan/<x>`, dan judul + meta deskripsi
+    mengikuti halaman/kategori yang terbuka.
+  - **Beranda dipadatkan**: hero berfoto (DTC Wonokromo) dengan judul besar, strip statistik
+    berlabel pendek (44 panduan · 104 izin SSW · 9 kategori), grid kategori ringkas,
+    kartu Balai RW berfoto Stasiun, band foto **"Wonokromo, dulu & kini"** (arsip Kurkdjian
+    1905–1906 vs Jalan Kranggan 2025), dan FAQ (2 kolom di desktop).
+  - **Desain permukaan rata**: pola ornamen dibuang — blob latar, tekstur titik, eyebrow,
+    ikon outline samar di banner, garis tipis di kartu, chip bercahaya; bayangan hanya untuk
+    elemen yang benar-benar mengambang (drawer, toast, hover lift), blur hanya di header.
+  - **Ukuran teks naik** (body 16px; skala 13/14/15/16) supaya nyaman dibaca warga,
+    label micro tidak lagi kapital semua, judul halaman layanan lebih besar.
+  - **Kartu kategori dirombak jadi teks murni**: panah dan ikon SVG di dalam kartu diganti
+    tanda tautan tipografis, supaya tidak terbaca sebagai "deretan kartu ikon".
+  - **Lint**: 0 FAIL / 2 WARN (font brand Poppins + em-dash, keduanya disengaja);
+    **klik semua jalur lolos** (17 cek: router, redirect, pencarian, drawer, crumb, tema foto).
 - **PWA**: dapat di-install ke layar utama HP, jalan offline (service worker cache-first app shell, SWR).
 - **Overhaul mobile**: target sentuh ≥40px, umpan balik `:active`, tap-highlight dimatikan,
   scrollbar rail tersembunyi juga di WebKit, `.kv` satu kolom di layar kecil, hero & toast yang
@@ -92,6 +116,19 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
 - **SEO/halaman**: tiap route mengubah `document.title` + meta description
   (riwayat back-button lebih informatif); canonical + og:image + robots.txt.
 - Semua konten, data layanan, dan fitur interaktif sama seperti aslinya.
+
+## Foto & kredit
+
+Lima foto asli Wonokromo di `assets/img/` (semua via Wikimedia Commons, catatan lengkap di
+`assets/credits.json` dan paragraf kredit di footer):
+
+| Foto | Dipakai di | Pembuat · Lisensi |
+|---|---|---|
+| `hero-dtc.jpg` | Hero beranda | Government of Surabaya, Indonesia · domain publik |
+| `stasiun-wonokromo.jpg` | Kartu Balai RW (beranda) | Rizal Febri Ardiansyah · CC BY-SA 4.0 |
+| `wonokromo-dulu.jpg` | Band "dulu & kini" | Ohannes Kurkdjian (KITLV 10836, 1905–1906) · domain publik |
+| `wonokromo-kini.jpg` | Band "dulu & kini" | Bahnfrend · CC BY-SA 4.0 |
+| `balai-kota.jpg` | Hero halaman SSW | Yamin Nathaniel · CC BY-SA 2.0 |
 
 ## Melakukan edit
 
