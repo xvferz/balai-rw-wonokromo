@@ -55,6 +55,11 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
   - **Jarak banner → konten katalog seragam**: baris kategori katalog sebelumnya menempel
     lurus ke banner (0px); kini isi katalog diberi jarak napas (24–32px, ikut lebar layar)
     dan margin atas "Semua kategori" dilepas supaya halaman kategori memakai jarak yang sama.
+- **Judul kartu tak lagi terpotong di tengah kata di ponsel (v9.5)**: `overflow-wrap:anywhere`
+    global membiarkan "Keterangan"/"Lingkungan" terpotong jadi huruf yatim ("Keteranga|n")
+    saat kolom kartu ~360px hanya menyisakan 85px; kolom teks diberi +8px (padding sisi kartu
+    14→12, jarak grid & ikon→teks 10→8, chip ikon 38→36) sehingga kata terpanjang (92px) utuh
+    mulai @360, dengan `hyphens:auto` sebagai lapis cadangan untuk layar yang lebih sempit.
 - **Ikon pencari izin persis di tengah chip (v9.4)**: rule pewarna teks `.lay-ssw span`
     menimpa `display:grid` chip `.row-ic`, membuat ikon menempel di pojok kiri-atas;
     selektor dipertajam menjadi `.lay-ssw div span` supaya chip tetap grid.
