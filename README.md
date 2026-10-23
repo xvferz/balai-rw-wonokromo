@@ -19,11 +19,9 @@ assets/app.js         → logika: render + ikon, pencarian berbobot skor, checkl
                         router hash (beranda / Layanan katalog / Layanan/<kategori> / svc / ssw / oss,
                         + redirect alias anchor lama) + judul & meta deskripsi per halaman,
                         tema per kategori, drawer, bagikan
-sw.js                 → service worker (offline-first, stale-while-revalidate; v9 mem-cache foto)
+sw.js                 → service worker (offline-first, stale-while-revalidate)
 manifest.webmanifest  → PWA manifest (dapat di-install ke layar utama HP)
 assets/icons/         → ikon PWA (dibuat oleh tools/make-icons.js)
-assets/img/           → foto Wonokromo (5 berkas; kredit di footer + assets/credits.json)
-assets/credits.json   → catatan per foto: pembuat, lisensi, halaman sumber
 serve.js              → server statis kecil untuk uji lokal / preview via Wi-Fi
 reference/            → snapshot HTML asli + catatan + hasil ekstraksi + skrip uji
 netlify.toml          → config deploy Netlify (publish ".", cache headers)
@@ -49,6 +47,14 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
 
 - Dipecah menjadi `index.html` + `assets/{style.css,data.js,app.js}` (asli: satu file HTML raksasa).
 - Menghapus snippet kolom komentar/HUD khusus Netlify.
+- **Sederhanakan UI/UX (v9.1)**:
+  - **Tanpa foto**: semua foto dihapus (hero beranda, kartu Balai RW, band "Wonokromo, dulu & kini",
+    hero SSW) — antarmuka kembali teks + ikon SVG murni; `assets/img/` & `assets/credits.json`
+    dihapus dan kode foto di footer/README/SW turut dibersihkan.
+  - **"Wonokromo, dulu & kini" dihapus** dari beranda; FAQ langsung mengikuti grid kategori.
+  - **Ikon SVG kembali di kartu kategori** (chip berwarna kategori), panah dekoratif dibuang.
+  - **Margin FAQ dirapikan**: padding seragam 16px, jarak antar-jawaban konsisten (12/16px),
+    jawaban terbuka dipisah garis tipis dari pertanyaannya.
 - **Halaman Layanan + permukaan rata (v9)**:
   - **"Layanan" jadi halaman sendiri** (`#layanan`): katalog 9 kategori sebagai kartu teks
     (tanpa ikon di atas kartu — warna kategori muncul saat hover) plus tile pintu masuk ke
@@ -119,16 +125,10 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
 
 ## Foto & kredit
 
-Lima foto asli Wonokromo di `assets/img/` (semua via Wikimedia Commons, catatan lengkap di
-`assets/credits.json` dan paragraf kredit di footer):
-
-| Foto | Dipakai di | Pembuat · Lisensi |
-|---|---|---|
-| `hero-dtc.jpg` | Hero beranda | Government of Surabaya, Indonesia · domain publik |
-| `stasiun-wonokromo.jpg` | Kartu Balai RW (beranda) | Rizal Febri Ardiansyah · CC BY-SA 4.0 |
-| `wonokromo-dulu.jpg` | Band "dulu & kini" | Ohannes Kurkdjian (KITLV 10836, 1905–1906) · domain publik |
-| `wonokromo-kini.jpg` | Band "dulu & kini" | Bahnfrend · CC BY-SA 4.0 |
-| `balai-kota.jpg` | Hero halaman SSW | Yamin Nathaniel · CC BY-SA 2.0 |
+Situs ini tidak lagi memakai foto apa pun (dirapikan pada v9.1) — seluruh visual berupa
+ikon SVG yang digambar sendiri di sprite inline, jadi tidak ada aset pihak ketiga yang
+perlu diatribusikan. Riwayat foto situs versi v9 (beserta kreditnya) tetap tersimpan
+di riwayat commit git.
 
 ## Melakukan edit
 
