@@ -55,6 +55,9 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
   - **Jarak banner → konten katalog seragam**: baris kategori katalog sebelumnya menempel
     lurus ke banner (0px); kini isi katalog diberi jarak napas (24–32px, ikut lebar layar)
     dan margin atas "Semua kategori" dilepas supaya halaman kategori memakai jarak yang sama.
+- **Ikon pencari izin persis di tengah chip (v9.4)**: rule pewarna teks `.lay-ssw span`
+    menimpa `display:grid` chip `.row-ic`, membuat ikon menempel di pojok kiri-atas;
+    selektor dipertajam menjadi `.lay-ssw div span` supaya chip tetap grid.
 - **Mengikuti halaman & navigasi lapis 3 (v9.2)**:
   - **Banner katalog ikut palet kategori**: `#layanan/<kategori>` kini menampilkan banner
     berwarna kategori yang dibuka (daftar kategori = hijau emerald bawaan); halaman layanan
