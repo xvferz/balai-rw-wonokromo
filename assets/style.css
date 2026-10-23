@@ -405,7 +405,8 @@ details.x ul{margin:2px 0 8px;font-size:var(--t-md)}
 .lay-ssw{display:flex;flex-wrap:wrap;align-items:center;gap:14px;background:var(--surface);border-radius:20px;padding:16px 18px;margin-top:26px}
 .lay-ssw div{flex:1 1 260px;min-width:0}
 .lay-ssw b{display:block;font-size:var(--t-md)}
-.lay-ssw span{display:block;color:var(--muted);font-size:var(--t-sm);margin-top:2px}
+/* selektor div: agar .lay-ssw span tidak menimpa display:grid chip .row-ic (penyebab ikon tak persis di tengah chip) */
+.lay-ssw div span{display:block;color:var(--muted);font-size:var(--t-sm);margin-top:2px}
 .lay-ssw .btn{flex:none}
 
 /* ============ Footer ============ */
