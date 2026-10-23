@@ -128,8 +128,8 @@ kbd{font:700 var(--t-xs) var(--f-body);background:var(--brand-soft);color:var(--
 .hero .btn{background:#fff;color:var(--hero-btn-ink,#06543C)}
 [data-hue] .hero{--hero-btn-ink:hsl(var(--page-h) calc(var(--page-s) * .9) 24%)}
 .hero .btn-soft{background:rgba(0,0,0,.25);color:var(--hero-ink)}
-/* Tombol kembali ke kategori (lapis 3) di dalam banner: ikut gaya tombol lembut banner */
-.hero .svc-back{background:rgba(0,0,0,.25);color:var(--hero-ink);margin:0 0 2px}
+/* Tombol kembali di dalam banner (katalog → beranda, lapis 3 → kategori): ikut gaya tombol lembut banner */
+.hero .hero-back{background:rgba(0,0,0,.25);color:var(--hero-ink);margin:0 0 2px}
 .hero .btn .ic{width:1em;height:1em}
 
 /* ============ Judul bagian ============ */
@@ -397,7 +397,11 @@ details.x ul{margin:2px 0 8px;font-size:var(--t-md)}
 
 /* ============ Halaman Layanan (katalog kategori) ============ */
 .hero .search{margin-top:20px;position:relative;z-index:1}
-.lay-back{margin:32px 0 14px}
+/* Napas di bawah banner katalog: baris kartu tidak menempel ke banner; pill "Semua kategori" kini tumpang tindih dengan penyokongan ini */
+#layananBody{padding-top:clamp(24px,4vw,32px)}
+.lay-back{margin:0 0 14px}
+/* Ikon pencari izin mengikat baris judul, bukan tengah blok teks 3 baris */
+.lay-ssw .row-ic{align-self:flex-start;margin-top:-5px}
 .lay-ssw{display:flex;flex-wrap:wrap;align-items:center;gap:14px;background:var(--surface);border-radius:20px;padding:16px 18px;margin-top:26px}
 .lay-ssw div{flex:1 1 260px;min-width:0}
 .lay-ssw b{display:block;font-size:var(--t-md)}

@@ -256,7 +256,7 @@ function renderSvc(s){
   $("svcBody").setAttribute("data-cat", "");
   $("svcBody").setAttribute("style", cvars(s.g));
   const crumb = (h) => `<nav class="crumbs"><a href="#beranda">Beranda</a>${IC("chevron-right")}<button type="button" data-g="${s.g}">${esc(gname(s.g))}</button>${IC("chevron-right")}<span>${esc(s.t)}</span></nav>`;
-  $("svcHead").innerHTML = `<a class="back svc-back" href="#layanan/${s.g}">${IC("arrow-left")} Kembali ke ${esc(gname(s.g))}</a>
+  $("svcHead").innerHTML = `<a class="back hero-back" href="#layanan/${s.g}">${IC("arrow-left")} Kembali ke ${esc(gname(s.g))}</a>
     <h1>${esc(s.t)}</h1><p class="lead">${esc(s.d)}</p>
     <div class="chips"><span>${esc(s.ch)}</span>${s.steps?`<span>${s.steps.length} langkah</span>`:""}</div>${crumb(s)}`;
   let h = "", side = "";
