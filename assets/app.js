@@ -256,7 +256,8 @@ function renderSvc(s){
   $("svcBody").setAttribute("data-cat", "");
   $("svcBody").setAttribute("style", cvars(s.g));
   const crumb = (h) => `<nav class="crumbs"><a href="#beranda">Beranda</a>${IC("chevron-right")}<button type="button" data-g="${s.g}">${esc(gname(s.g))}</button>${IC("chevron-right")}<span>${esc(s.t)}</span></nav>`;
-  $("svcHead").innerHTML = `<h1>${esc(s.t)}</h1><p class="lead">${esc(s.d)}</p>
+  $("svcHead").innerHTML = `<a class="back svc-back" href="#layanan/${s.g}">${IC("arrow-left")} Kembali ke ${esc(gname(s.g))}</a>
+    <h1>${esc(s.t)}</h1><p class="lead">${esc(s.d)}</p>
     <div class="chips"><span>${esc(s.ch)}</span>${s.steps?`<span>${s.steps.length} langkah</span>`:""}</div>${crumb(s)}`;
   let h = "", side = "";
   const blk = (cls, ic, title, body) => `<div class="block ${cls}"><h3><span class="b-ic">${IC(ic)}</span>${esc(title)}</h3>${body}</div>`;
@@ -447,7 +448,20 @@ function route(){
     md.setAttribute("content", desc);
   }
   /* Masuk katalog: kosongkan pencarian lama supaya selalu mulai dari daftar kategori */
-  if(view === "layanan"){ $("lq").value = ""; renderLayanan(); }
+  if(view === "layanan"){
+    $("lq").value = ""; renderLayanan();
+    /* Banner katalog ikut palet kategori yang dibuka (daftar kategori = emerald bawaan) */
+    const heroL = document.querySelector('[data-view="layanan"] .hero');
+    if(layCat){ heroL.setAttribute("data-cat", ""); heroL.setAttribute("style", cvars(layCat)); }
+    else { heroL.removeAttribute("data-cat"); heroL.removeAttribute("style"); }
+  }
+  /* Ornamen banner: glyph sesuai halaman, mengikuti kategori di katalog & lapis 3 */
+  const orn = document.querySelector(`[data-view="${view}"] .hero-orn`);
+  if(orn){
+    const gl = view === "svc" ? gicon(svc.g)
+      : (view === "layanan" && layCat ? gicon(layCat) : ({beranda:"search", ssw:"building", oss:"briefcase"}[view] || "list"));
+    orn.querySelector("use").setAttribute("href", "#i-" + gl);
+  }
 }
 window.addEventListener("hashchange", route);
 

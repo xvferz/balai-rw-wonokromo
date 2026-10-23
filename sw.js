@@ -1,6 +1,6 @@
 /* Service worker: offline-first app shell for Pelayanan Balai RW Wonokromo.
  * Strategy: stale-while-revalidate for same-origin GETs. */
-const VERSION = 'balai-rw-v9.1';
+const VERSION = 'balai-rw-v9.2';
 const ASSETS = [
   './',
   './index.html',
