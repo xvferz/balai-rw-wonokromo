@@ -47,6 +47,21 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
 
 - Dipecah menjadi `index.html` + `assets/{style.css,data.js,app.js}` (asli: satu file HTML raksasa).
 - Menghapus snippet kolom komentar/HUD khusus Netlify.
+- **Mengikuti halaman & navigasi lapis 3 (v9.2)**:
+  - **Banner katalog ikut palet kategori**: `#layanan/<kategori>` kini menampilkan banner
+    berwarna kategori yang dibuka (daftar kategori = hijau emerald bawaan); halaman layanan
+    (lapis 3) memang sudah ikut warna kategorinya sejak v7.
+  - **Hiasan banner satu motif**: glyph ikon situs diperbesar, samar (opacity 7%), di sisi
+    kanan atas dan tergunting sudut banner — Cari di beranda, Bangunan di SSW, Tas kerja di
+    OSS, Daftar di katalog; di katalog dalam & lapis 3 glyph mengikuti ikon kategorinya
+    (didukung `route()`), sehingga hiasan ini tetap berisi makna, bukan blob hiasan.
+  - **Jarak FAQ seragam**: kartu sebaris kini disamakan tingginya (grid standar, tanpa
+    `align-items:start`), sehingga jarak antar kartu terhitung sama di kedua kolom.
+  - **Tombol Kembali di lapis 3**: banner halaman layanan punya tombol "Kembali ke <kategori>"
+    di atas judul (crumb tetap ada) menuju halaman kategorinya.
+  - **Verifikasi**: lint 0 FAIL / 4 WARN (font brand Poppins, glass header, overshoot scale(0),
+    em-dash — semuanya disengaja); klik semua jalur lolos (20 cek, termasuk hue banner dan
+    tombol Kembali).
 - **Sederhanakan UI/UX (v9.1)**:
   - **Tanpa foto**: semua foto dihapus (hero beranda, kartu Balai RW, band "Wonokromo, dulu & kini",
     hero SSW) — antarmuka kembali teks + ikon SVG murni; `assets/img/` & `assets/credits.json`
