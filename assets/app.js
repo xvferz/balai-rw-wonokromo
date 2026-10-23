@@ -86,7 +86,7 @@ function tileHTML(s){
   return `<a class="tile" data-cat style="${cvars(s.g)}" href="#${s.id}"><b>${esc(s.t)}</b><small>${esc(s.d)}</small><span class="ch">${esc(s.ch)}</span><span class="go" aria-hidden="true">↗</span></a>`;
 }
 function rwcardHTML(){
-  return `<div class="rwcard"><img class="rw-photo" src="assets/img/stasiun-wonokromo.jpg" width="1280" height="960" alt="Stasiun Wonokromo, landmark Kecamatan Wonokromo, Surabaya" loading="lazy" decoding="async">
+  return `<div class="rwcard"><span class="rw-ic">${IC("building")}</span>
     <div class="rwtop"><b>Bingung mulai dari mana? Datang ke Balai RW.</b><span>Petugas ASN di sana siap membantu menjawab pertanyaan Anda.</span></div>
     <div class="rwfacts">
       <div><small>Lokasi</small><b>Seluruh Kecamatan Wonokromo</b></div>
@@ -122,13 +122,15 @@ function renderHome(){
 
 /* ============ Halaman Layanan (katalog semua kategori) ============ */
 let layCat = null, curView = "beranda";
+function kcardHTML(g,l){
+  const n = SVC.filter(s=>s.g===g).length;
+  return `<a class="kcard" data-cat style="${cvars(g)}" href="#layanan/${g}">
+    <span class="kcard-ic">${IC(gicon(g))}</span>
+    <span class="kcard-b"><b>${esc(tidy(l))}</b><small>${n} panduan</small></span>
+  </a>`;
+}
 function layIndexHTML(){
-  const cards = GROUPS.map(([g,l]) => {
-    const n = SVC.filter(s=>s.g===g).length;
-    return `<a class="kcard" data-cat style="${cvars(g)}" href="#layanan/${g}">
-      <span class="kcard-b"><b>${esc(tidy(l))}</b><small>${n} panduan</small></span>
-    </a>`;
-  }).join("");
+  const cards = GROUPS.map(([g,l]) => kcardHTML(g,l)).join("");
   const sswEntry = `<section class="lay-ssw"><span class="row-ic">${IC("search")}</span><div><b>Mencari jenis izin tertentu?</b><span>Telusuri ${ALL.length} izin non-berusaha di pencari SSW Alfa, lengkap dengan status retribusinya.</span></div><a class="btn btn-soft" href="#ssw">Buka pencari izin ${IC("arrow-right")}</a></section>`;
   return `<div class="kgrid">${cards}</div>${sswEntry}`;
 }
@@ -154,12 +156,7 @@ function renderLayanan(){
 }
 
 /* Grid kategori + kategori footer */
-$("kgrid").innerHTML = GROUPS.map(([g,l]) => {
-  const n = SVC.filter(s=>s.g===g).length;
-  return `<a class="kcard" data-cat style="${cvars(g)}" href="#layanan/${g}">
-    <span class="kcard-b"><b>${esc(tidy(l))}</b><small>${n} panduan</small></span>
-  </a>`;
-}).join("");
+$("kgrid").innerHTML = GROUPS.map(([g,l]) => kcardHTML(g,l)).join("");
 $("footCats").innerHTML = GROUPS.map(([g,l]) => `<li><button type="button" data-g="${g}">${esc(tidy(l))}</button></li>`).join("");
 
 $("hstats").innerHTML = `<div><b>${SVC.length}</b><span>panduan</span></div><div><b>${ALL.length}</b><span>izin SSW Alfa</span></div><div><b>${GROUPS.length}</b><span>kategori</span></div>`;
