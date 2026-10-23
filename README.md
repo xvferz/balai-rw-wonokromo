@@ -47,6 +47,14 @@ npx.cmd serve .        # jika npx.ps1 diblokir execution policy, pakai npx.cmd
 
 - Dipecah menjadi `index.html` + `assets/{style.css,data.js,app.js}` (asli: satu file HTML raksasa).
 - Menghapus snippet kolom komentar/HUD khusus Netlify.
+- **Rapikan halaman katalog (v9.3)**:
+  - **Ikon pencari izin mengikat judul**: chip "Mencari jenis izin tertentu?" kini sejajar
+    dengan baris judulnya (sebelumnya mengapung di tengah blok teks saat desc beberapa baris).
+  - **Tombol Kembali ke Beranda** di banner katalog — melengkapi tangga kembali:
+    lapis 3 → kategori, kategori → katalog, katalog → beranda.
+  - **Jarak banner → konten katalog seragam**: baris kategori katalog sebelumnya menempel
+    lurus ke banner (0px); kini isi katalog diberi jarak napas (24–32px, ikut lebar layar)
+    dan margin atas "Semua kategori" dilepas supaya halaman kategori memakai jarak yang sama.
 - **Mengikuti halaman & navigasi lapis 3 (v9.2)**:
   - **Banner katalog ikut palet kategori**: `#layanan/<kategori>` kini menampilkan banner
     berwarna kategori yang dibuka (daftar kategori = hijau emerald bawaan); halaman layanan
